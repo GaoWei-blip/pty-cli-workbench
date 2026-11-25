@@ -1,0 +1,235 @@
+/* ==========================================================================
+   第十五轮 F1：时间线与输入框（结束行改动胶囊与分叉、用户消息操作条、回退预览与回退行、计划卡、
+   拒绝并说明、上下文环与小卡、输入框横幅、添加的文件夹、简洁档、压缩行、命令补全分组）
+   颜色只用 theme.css 变量；时间线里的元素不加位移动画，只有浮在条目上的操作条用 120ms 透明度显隐。
+   ========================================================================== */
+.k-i{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.k-i.k-chev{width:10px;height:10px;stroke-width:1.4;opacity:.8}
+.k-grow{flex:1;min-width:0}
+@keyframes kUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes kRot{to{transform:rotate(360deg)}}
+.k-spin{flex:none;display:inline-block;box-sizing:border-box;width:12px;height:12px;border:1.5px solid var(--line2);border-top-color:var(--muted);border-radius:50%;animation:kRot .8s linear infinite}
+
+/* ---------- 结束行：改动胶囊 + 从这里分叉 ---------- */
+body.k-on #feed .tend>.fk,body.k-on #feed .spin.done>.fk{display:none!important}  /* 原来的“从这里分叉”换成带下拉的那个 */
+body.k-on #feed .dz-bar [data-a=fork]{display:none}                                /* 分叉统一放在结束行 */
+#feed .tend{flex-wrap:wrap}
+#feed .k-end{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 2px;min-width:0;max-width:100%;margin:-3px 0 -3px 4px}
+#feed .k-chg{display:inline-flex;align-items:center;gap:6px;height:24px;max-width:100%;overflow:hidden;margin-right:2px;padding:0 10px;border:1px solid var(--line2);border-radius:999px;
+  background:var(--bg);color:var(--fg2);font:12px/20px var(--sans);white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums;
+  transition:background-color .12s ease,color .12s ease,border-color .12s ease}
+#feed .k-chg:hover{background:var(--hover);color:var(--strong);border-color:color-mix(in srgb,var(--fg) 18%,var(--line2))}
+#feed .k-chg:active{background:var(--hover2)}
+#feed .k-chg .k-cn{font:11.5px/20px var(--mono);color:var(--muted)}
+#feed .k-pm{display:inline-flex;gap:5px}
+#feed .k-pm:empty{display:none}
+#feed .k-pm b{font-weight:500}
+#feed .k-pm .a,.k-rwlist .a{color:var(--green)}
+#feed .k-pm .d,.k-rwlist .d{color:var(--red)}
+#feed .k-fork{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border:0;border-radius:999px;background:transparent;
+  color:var(--muted);font:12px/22px var(--sans);white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+#feed .k-fork:hover,#feed .k-fork.open{background:var(--hover2);color:var(--strong)}
+#feed .k-fork:active{background:var(--hover2)}
+/* 过去的轮次：悬停这一轮时才显示分叉；最后一轮一直显示 */
+#feed .tend .k-fork{opacity:0}
+#feed .tend:hover .k-fork,#feed .tl:hover+.tend .k-fork,#feed .tend .k-fork:focus-visible,#feed .tend .k-fork.open{opacity:1}
+
+/* ---------- 用户消息悬停操作条 ---------- */
+#feed .k-uact{position:relative;height:0;margin:0}
+#feed .k-ubar{position:absolute;right:0;top:-15px;z-index:3;display:flex;gap:1px;padding:2px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh1);opacity:0;pointer-events:none;transition:opacity .12s ease}
+#feed .ufold+.k-uact .k-ubar{top:-6px}
+#feed .user:hover+.k-uact .k-ubar,#feed .user:hover+.ufold+.k-uact .k-ubar,#feed .ufold:hover+.k-uact .k-ubar,
+#feed .k-uact:hover .k-ubar,#feed .k-ubar:focus-within{opacity:1;pointer-events:auto}
+#feed .k-ubar button{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:var(--muted);font:12px/22px var(--sans);
+  padding:0 8px;border-radius:var(--r-s);white-space:nowrap;cursor:pointer}
+#feed .k-ubar button:hover{color:var(--strong);background:var(--hover2)}
+#feed .k-ubar button:active{background:var(--hover)}
+#feed .k-ubar button[aria-disabled=true],#feed .k-ubar button[aria-disabled=true]:hover{color:var(--dim);background:transparent;cursor:default}
+
+/* ---------- 回退预览（弹窗） ---------- */
+#card.k-narrow{width:min(520px,100%)}
+#card.k-wide{width:min(760px,100%)}
+.k-rw h3{margin:0 0 4px}
+.k-rwq{color:var(--muted);font-size:13px;line-height:1.5;margin:2px 0 8px;padding-left:10px;border-left:2px solid var(--line2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k-rwb{min-height:64px}
+.k-load{display:flex;align-items:center;gap:8px;padding:20px 0 6px;color:var(--muted);font-size:13px}
+.k-rwsec{display:flex;align-items:center;gap:6px;margin:14px 0 6px;font-size:12.5px;color:var(--muted)}
+.k-rwlist{max-height:188px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:var(--r-m);background:var(--bg);scrollbar-width:thin}
+.k-rwlist>div{display:flex;align-items:center;gap:8px;min-width:0;padding:6px 12px;border-top:1px solid var(--line);font:12.5px/1.5 var(--mono);color:var(--fg)}
+.k-rwlist>div:first-child{border-top:0}
+.k-rwlist .k-i{color:var(--muted)}
+.k-rwlist .k-fp{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k-rwlist em{flex:none;display:inline-flex;gap:6px;font:normal 12px var(--sans);color:var(--dim);font-variant-numeric:tabular-nums}
+.k-rwlist em b{font-weight:500}
+.k-rwempty{padding:18px 0 4px;color:var(--muted);font-size:13px}
+.k-rwws{margin-top:14px}
+.k-rwwarn{display:flex;align-items:flex-start;gap:8px;margin-top:8px;font-size:12.5px;line-height:1.55;color:var(--fg2);overflow-wrap:anywhere}
+.k-rwwarn .k-i{margin-top:2px;color:var(--muted)}
+.k-rwwarn.amb .k-i{color:var(--amber)}
+.k-rwwarn code,.k-rwq code{font:12px var(--mono);background:var(--code);padding:0 4px;border-radius:4px}
+.k-rwerr{margin-top:12px;color:var(--red);font-size:12.5px;overflow-wrap:anywhere}
+.k-rwerr[hidden]{display:none}
+
+/* ---------- 时间线里的回退行 ---------- */
+#feed .k-row{display:flex;align-items:center;gap:8px;min-height:36px;box-sizing:border-box;margin:14px 0 6px;padding:5px 6px 5px 12px;
+  border:1px solid var(--line);border-radius:var(--r-m);background:var(--box);font-size:13px;line-height:1.5;color:var(--fg2)}
+#feed .k-row>.k-i{color:var(--muted)}
+#feed .k-row .k-rt{flex:1;min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#feed .k-row.undone .k-rt{color:var(--muted)}
+#feed .k-undo{flex:none;box-sizing:border-box;height:24px;border:1px solid var(--line2);border-radius:var(--r);padding:0 10px;background:var(--surface);color:var(--fg2);
+  font:12.5px/22px var(--sans);white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+#feed .k-undo:hover:not(:disabled){background:var(--hover2);color:var(--strong)}
+#feed .k-undo:active:not(:disabled){transform:scale(.97)}
+#feed .k-undo:disabled{color:var(--dim);cursor:default}
+
+/* ---------- 计划卡 ---------- */
+#feed .k-planhide{display:none!important}
+#feed .k-cmphide{display:none!important}  /* 第十五轮联调：压缩提示行顶替 CLI 原文那行 */
+#feed .k-plan{margin:12px 0 8px;min-width:0;border:1px solid var(--line2);border-radius:var(--r-l);background:var(--surface);box-shadow:var(--sh1)}
+#feed .k-plh{display:flex;align-items:center;gap:8px;min-height:44px;box-sizing:border-box;padding:6px 10px 6px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+#feed .k-plh b{color:var(--strong);font-weight:600}
+/* .k-ghost 与 .lx-ghost 是同一种文字按钮，定义合并到 theme.css */
+#feed .k-plmd{padding:12px 16px 8px;overflow-wrap:anywhere;min-width:0}
+#feed .k-plmd>:first-child{margin-top:.2em}
+#feed .k-plmd h1{font-size:16px;margin:.2em 0 .6em}
+#feed .k-plmd h2{font-size:14.5px;margin:1em 0 .4em}
+#feed .k-plmd h3{font-size:13.5px;margin:.9em 0 .35em}
+#feed .k-placts{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+#feed .k-placts .btn{white-space:normal;text-align:left}
+#feed .k-placts .k-fbb.open{background:var(--hover2)}
+#feed .k-plan.busy .k-placts .btn:not(.on){opacity:.45}
+#feed .k-plan.busy .k-placts .btn.on{box-shadow:0 0 0 3px var(--ring)}
+#feed .k-plfb{display:flex;align-items:flex-end;gap:8px;margin:0 16px 16px;padding:8px 8px 8px 12px;border:1px solid var(--line2);border-radius:var(--r-m);background:var(--bg)}
+#feed .k-plfb[hidden]{display:none}
+#feed .k-plfb:focus-within{border-color:color-mix(in srgb,var(--accent) 45%,var(--line2));box-shadow:0 0 0 3px var(--accent-soft)}
+#feed .k-plfb textarea{flex:1;min-width:0;min-height:44px;max-height:200px;margin:0;padding:2px 0;border:0;background:transparent;resize:none;outline:none;
+  font:13.5px/1.6 var(--sans);color:var(--strong)}
+#feed .k-plfb textarea::placeholder{color:var(--dim)}
+.k-sendb{flex:none;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:var(--btn);color:var(--btn-fg);cursor:pointer;
+  transition:background-color .12s ease,opacity .12s ease}
+.k-sendb:hover:not(:disabled){background:var(--btn-h)}
+.k-sendb:active:not(:disabled){transform:scale(.94)}
+.k-sendb:disabled{opacity:.3;cursor:default}
+.k-sendb .k-i{width:15px;height:15px;stroke-width:1.8}
+
+/* ---------- 授权弹窗：拒绝并说明 ---------- */
+.card .acts .k-dnb{margin-right:auto}
+.card .acts .k-dnb[hidden]{display:none}
+.card .k-dn{display:flex;gap:8px;margin-top:14px}
+.card .k-dn input{flex:1;min-width:0;padding:6px 11px;border:1px solid var(--line2);border-radius:var(--r);background:var(--bg);color:var(--strong);font:13px/20px var(--sans)}
+.card .k-dn input:focus{outline:none;border-color:color-mix(in srgb,var(--accent) 50%,var(--line2));box-shadow:0 0 0 3px var(--accent-soft)}
+.card .k-dn input::placeholder{color:var(--dim)}
+.card .k-dn .k-dngo{flex:none;white-space:nowrap}
+
+/* ---------- 上下文环与小卡 ---------- */
+#composer .bar #ctx.k-off{display:none}
+#kRing{flex:none;display:inline-flex;align-items:center;gap:5px;height:30px;margin:0 2px 0 0;padding:0 8px;border:0;border-radius:9px;background:transparent;
+  color:var(--muted);font:12.5px/30px var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+#kRing[hidden],body.h-home #kRing{display:none}
+#kRing:hover,#kRing.open{background:var(--hover2);color:var(--strong)}
+#kRing:active{transform:scale(.97)}
+#kRing .k-rg{width:16px;height:16px;flex:none;fill:none;stroke-width:2.6}
+#kRing .tr{stroke:var(--line2)}
+#kRing .pg{stroke:var(--fg2);stroke-linecap:round}
+#kRing.warn .pg{stroke:var(--amber)}
+#kRing.full .pg{stroke:var(--red)}
+#kRing.warn{color:var(--amber)}
+#kRing.full{color:var(--red)}
+@container (max-width:480px){#kRing .k-rp{display:none}#kRing{padding:0 7px}}
+.k-ctx{position:fixed;z-index:40;box-sizing:border-box;width:272px;max-width:calc(100vw - 16px);padding:14px 14px 12px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-l);box-shadow:var(--sh3);color:var(--fg);font-size:13px;line-height:1.5;text-align:left;
+  animation:kUp .15s cubic-bezier(.2,.8,.2,1)}
+.k-ctx[hidden]{display:none}
+.k-cxk{font-size:12px;color:var(--muted)}
+.k-cxbig{font-variant-numeric:tabular-nums}
+.k-cxbig .v{font-size:17px;font-weight:600;color:var(--strong)}
+.k-cxbig .p{margin-left:2px;font-size:13px;color:var(--muted)}
+.k-cxbar{height:6px;margin:8px 0 10px;border-radius:3px;background:var(--raise);overflow:hidden}
+.k-cxbar i{display:block;height:100%;max-width:100%;border-radius:3px;background:var(--fg2)}
+.k-cxbar.warn i{background:var(--amber)}
+.k-cxr{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--fg2);font-variant-numeric:tabular-nums}
+.k-cxr[hidden]{display:none}
+.k-cxr .l{color:var(--muted)}
+.k-cxr.amb .l{color:var(--amber)}
+.k-cxa{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.k-sel{flex:1;min-width:0;height:28px;box-sizing:border-box;border:1px solid var(--line2);border-radius:var(--r);padding:0 10px;background:var(--bg);color:var(--fg2);font:12.5px/1.6 var(--sans);
+  white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.k-sel:hover:not(:disabled),.k-sel.on{background:var(--hover);color:var(--strong)}
+.k-sel:active:not(:disabled){background:var(--hover2)}
+.k-sel:disabled{color:var(--dim);cursor:default}
+.k-cxc{display:flex;gap:6px;margin-top:8px}
+.k-cxc[hidden]{display:none}
+.k-cxc input{flex:1;min-width:0;padding:3px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--strong);font:12.5px/1.6 var(--sans)}
+.k-cxc input:focus{outline:none;border-color:color-mix(in srgb,var(--accent) 50%,var(--line2));box-shadow:0 0 0 3px var(--accent-soft)}
+.k-cxc input::placeholder{color:var(--dim)}
+.k-cxc .k-go{flex:none}
+.k-cxerr{margin-top:8px;color:var(--red);font-size:12px;overflow-wrap:anywhere}
+.k-cxerr[hidden]{display:none}
+
+/* ---------- 明细浮层 ---------- */
+.k-sheet .k-shh{display:flex;align-items:center;gap:8px;margin:-4px -8px 12px 0}
+.k-sheet .k-shh h3{flex:1;min-width:0;margin:0}
+.k-ib{flex:none;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer;
+  transition:background-color .12s ease,color .12s ease}
+.k-ib:hover{background:var(--hover2);color:var(--strong)}
+.card .md.k-shb{max-height:min(66vh,640px);margin:0;padding:10px 16px;overflow-y:auto;overflow-x:hidden;overflow-wrap:anywhere}
+
+/* ---------- 输入框上方横幅（命令拦截、接口出错） ---------- */
+#kBan{display:flex;align-items:center;gap:6px;min-width:0;margin:0 0 8px;padding:4px 6px 4px 12px;min-height:38px;box-sizing:border-box;border:1px solid var(--line2);border-radius:var(--r-l);
+  background:var(--raise);color:var(--fg2);font-size:13px;line-height:1.5;animation:kUp .15s cubic-bezier(.2,.8,.2,1)}
+#kBan[hidden]{display:none}
+#kBan>.k-i{width:15px;height:15px;color:var(--muted)}
+#kBan.err>.k-i{color:var(--red)}
+#kBan .k-bt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#kBan code{font:12.5px var(--mono);color:var(--strong)}
+#kBan .k-ib{width:28px;height:28px}
+#kBan .k-ib .k-i{width:13px;height:13px}
+
+/* ---------- 这个对话添加的文件夹 ---------- */
+#kDirs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-width:0}
+#kDirs[hidden],body.h-home #kDirs{display:none}
+.k-dir{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;box-sizing:border-box;padding:2px 8px;border:1px solid var(--line);border-radius:8px;
+  background:var(--box);color:var(--fg2)}
+.k-dir .k-i{color:var(--muted)}
+.k-dir span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px/20px var(--mono)}
+
+/* ---------- 简洁档：只看过程摘要行和最终回复 ---------- */
+body.k-simple #feed .it.tool>.box,body.k-simple #feed .it.tool>.thumbs,body.k-simple #feed .it.tool>.subbtn,body.k-simple #feed .it.tool>.subtl,
+body.k-simple #feed .it.tool>ul.todos,body.k-simple #feed .it.tool>.more,body.k-simple #feed .it .tbody{display:none!important}
+body.k-simple #feed .it.tool>.head{cursor:default}
+body.k-simple #feed .it.tool.fold>.head:after,body.k-simple #feed .thought.has:after{content:none}
+body.k-simple #feed .thought.has{cursor:default}
+
+/* ---------- 压缩上下文 ---------- */
+#feed .k-cmp .k-cmph{display:inline-flex;align-items:center;gap:7px;max-width:100%;margin:0 0 0 -6px;padding:0 8px 0 6px;border:0;border-radius:var(--r-s);
+  background:none;color:var(--muted);font:13px/22px var(--sans);text-align:left}
+#feed .k-cmp button.k-cmph{cursor:pointer}
+#feed .k-cmp button.k-cmph:hover{background:var(--hover);color:var(--strong)}
+#feed .k-cmp .k-chev{transform:rotate(-90deg)}
+#feed .k-cmp.open .k-chev{transform:none}
+#feed .k-cmpb{margin-top:6px;padding-left:12px;border-left:2px solid var(--line);color:var(--muted);font-size:13px}
+#feed .k-cmpb[hidden]{display:none}
+
+/* ---------- 命令补全分组 ---------- */
+#pop .pgrp{padding:7px 10px 3px;color:var(--dim);font-size:11.5px;font-weight:500;letter-spacing:.02em;cursor:default}
+#pop .pgrp:first-child{padding-top:3px}
+#pop .pgrp+.pi{scroll-margin-top:28px}
+
+/* ---------- 第十五轮打磨：计划被退回不按出错显示、等计划确认时的结束行 ---------- */
+/* 提修改意见 / 继续规划是用户的正常选择：圆点、输出颜色按普通工具行显示 */
+#feed .it.tool.err[data-tool=ExitPlanMode]:before{background:var(--dot)}
+#feed .it.tool.err[data-tool=ExitPlanMode] .row.eout pre{color:var(--fg2)}
+#feed .it.tool.err[data-tool=ExitPlanMode] .row.eout b{font-size:0}
+#feed .it.tool.err[data-tool=ExitPlanMode] .row.eout b:before{content:"OUT";font-size:11px}
+body.k-simple #feed .it.tool[data-tool=ExitPlanMode]{display:none}
+/* 计划卡还在等确认：结束行不显示“未完成 0 秒” */
+#feed .k-plan~.spin.done.stall .sx{display:none}
+#feed .k-plan~.spin.done.stall .sv{font-size:0}
+#feed .k-plan~.spin.done.stall .sv:before{content:"等待确认计划";font-size:12.5px}
+#feed .k-plan~.spin.done.stall .sg{color:var(--accent)}
+
+@media (prefers-reduced-motion:reduce){
+  .k-spin,.k-ctx,#kBan{animation:none}
+  #feed .k-ubar,#feed .k-chg,#feed .k-fork,#kRing,.k-sel,.k-ghost,.k-ib,.k-sendb{transition:none}
+}

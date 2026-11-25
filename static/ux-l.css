@@ -1,0 +1,185 @@
+/* 第十五轮 F2：审阅范围、任务停止、旁问、记忆与指令、预览编辑、左栏筛选、“用…打开”。
+   颜色只用 theme.css 的变量（浅色 / 深色都跟着变）；时间线里不加动画；减少动态效果时关动画。 */
+
+/* ---------- 通用 ---------- */
+.lx-i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.lx-i.lx-sm{width:14px;height:14px}
+.lx-i.lx-chev{width:10px;height:10px;stroke-width:1.4}
+.lx-i.lx-fill{fill:currentColor;stroke:none}
+.lx-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;height:28px;padding:0 11px;border:1px solid var(--line2);border-radius:var(--r);
+  background:var(--surface);color:var(--fg2);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;
+  transition:background-color .12s ease,color .12s ease,border-color .12s ease,transform .08s ease}
+.lx-btn:hover:not(:disabled){background:var(--hover2);color:var(--strong)}
+.lx-btn:active:not(:disabled){transform:scale(.97)}
+.lx-btn:disabled,.lx-btn.dis{opacity:.5;cursor:default}
+.lx-btn.dis:hover{background:var(--surface);color:var(--fg2)}
+.lx-btn.dis:active{transform:none}
+.lx-btn.pri{background:var(--btn);color:var(--btn-fg);border-color:transparent;box-shadow:var(--sh1)}
+.lx-btn.pri:hover:not(:disabled){background:var(--btn-h);color:var(--btn-fg)}
+.lx-btn.pri:disabled{opacity:.35}
+.lx-link{flex:none;border:0;background:none;border-radius:var(--r-s);padding:1px 6px;font:inherit;font-size:12.5px;color:var(--accent);cursor:pointer;white-space:nowrap}
+.lx-link:hover{background:var(--accent-soft)}
+.lx-ghost.ok{color:var(--green)}
+.lx-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:44px 16px;text-align:center;color:var(--dim)}
+.lx-empty b{font-weight:400;font-size:13px;color:var(--muted)}
+.lx-eic{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hover);color:var(--dim)}
+.lx-eic .lx-i{width:18px;height:18px}
+.lx-spin{display:inline-block;width:12px;height:12px;flex:none;border:1.5px solid var(--line2);border-top-color:var(--muted);border-radius:50%;animation:lxSpin .8s linear infinite}
+@keyframes lxSpin{to{transform:rotate(360deg)}}
+.lx-tag{display:inline-block;margin-left:8px;padding:0 6px;border-radius:5px;font-size:11px;line-height:17px;color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent);vertical-align:1px}
+.lx-menu .lx-mi{flex-direction:row;align-items:center;gap:9px;min-width:150px}
+.lx-menu .lx-mi>span:not(.lx-mic){flex:1;min-width:0}
+.lx-mic{display:grid;place-items:center;width:16px;color:var(--muted)}
+.lx-ck{display:grid;place-items:center;font-style:normal;color:var(--accent)}
+
+/* ---------- 1. 审阅：范围切换、文件、差异 ---------- */
+.lx-rvtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;min-width:0}
+.lx-seg{display:inline-flex;flex:none;background:var(--seg-bg);border-radius:var(--r);padding:2px;gap:2px;max-width:100%}
+.lx-seg button{border:0;background:none;border-radius:var(--r-s);padding:2px 10px;font:inherit;font-size:12.5px;line-height:20px;color:var(--muted);white-space:nowrap;cursor:pointer;
+  transition:background-color .12s ease,color .12s ease}
+.lx-seg button:hover{color:var(--strong)}
+.lx-seg button.on{background:var(--seg-on);color:var(--strong);box-shadow:var(--seg-sh);font-weight:500}
+.lx-rvsum{margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.lx-rvsum b,.lx-pm b{font-weight:500}
+.lx-rvsum .a,.lx-pm .a{color:var(--green)}
+.lx-rvsum .d,.lx-pm .d{color:var(--red)}
+.lx-rvsum .d{margin-left:2px}
+.lx-rvq{margin:-2px 2px 10px;padding-left:10px;border-left:2px solid var(--line2);font-size:12.5px;line-height:1.5;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lx-rvf{border:1px solid var(--line);border-radius:var(--r-m);background:var(--bg);margin:6px 0;overflow:hidden;min-width:0}
+.lx-rvr{display:flex;align-items:center;gap:7px;min-width:0;padding:6px 6px 6px 10px;cursor:pointer;font-size:13px;user-select:none;-webkit-user-select:none;transition:background-color .12s ease}
+.lx-rvr:hover{background:var(--hover)}
+.lx-rvr:focus-visible{outline:2px solid var(--ring);outline-offset:-2px}
+.lx-rvr>.lx-chev{color:var(--dim);transform:rotate(-90deg);transition:transform .12s ease}
+.lx-rvf.open .lx-rvr>.lx-chev{transform:none}
+.lx-rvr .kind{line-height:16px}
+.lx-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left;font:12.5px var(--mono);color:var(--fg)}
+.lx-nm bdi{unicode-bidi:isolate}
+.lx-pm{flex:none;display:inline-flex;gap:5px;font-size:12px;font-variant-numeric:tabular-nums}
+.lx-more{flex:none;display:grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:var(--r-s);background:none;color:var(--muted);cursor:pointer;opacity:0;transition:opacity .12s ease,background-color .12s ease}
+.lx-rvr:hover .lx-more,.lx-more:focus-visible{opacity:1}
+.lx-more:hover{background:var(--hover2);color:var(--strong)}
+@media (hover:none){.lx-more{opacity:1}}
+.lx-diff{border-top:1px solid var(--line);max-height:62vh;overflow-y:auto;overflow-x:hidden}
+.lx-diff table{width:100%;border-collapse:collapse;table-layout:fixed;font:12px/1.65 var(--mono)}
+.lx-diff col.lx-cn{width:40px}
+.lx-diff col.lx-cs{width:16px}
+.lx-l td{padding:0;vertical-align:top}
+.lx-l .lx-no{text-align:right;padding-right:6px;color:var(--dim);user-select:none;-webkit-user-select:none;font-variant-numeric:tabular-nums}
+.lx-l .lx-sg{text-align:center;color:var(--dim);user-select:none;-webkit-user-select:none}
+.lx-l .lx-cd{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;padding-right:10px;color:var(--fg2)}
+.lx-l.a td{background:var(--add)}
+.lx-l.d td{background:var(--del)}
+.lx-l.a .lx-no{box-shadow:inset 2px 0 0 var(--green)}
+.lx-l.d .lx-no{box-shadow:inset 2px 0 0 var(--red)}
+.lx-l.a .lx-sg{color:var(--green)}
+.lx-l.d .lx-sg{color:var(--red)}
+.lx-wd{background:color-mix(in srgb,var(--red) 28%,transparent);color:var(--strong);border-radius:3px;padding:0 1px}
+.lx-wa{background:color-mix(in srgb,var(--green) 28%,transparent);color:var(--strong);border-radius:3px;padding:0 1px}
+.lx-fold td{padding:3px 10px;background:var(--box);color:var(--muted);font:12px/1.7 var(--sans);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.lx-diff tr:first-child.lx-fold td{border-top:0}
+.lx-diff tr:last-child.lx-fold td{border-bottom:0}
+.lx-fold span{display:inline-flex;align-items:center;gap:6px}
+.lx-fold .lx-chev{color:var(--dim);transform:rotate(-90deg)}
+.lx-fold.can{cursor:pointer}
+.lx-fold.can:hover td{background:var(--hover2);color:var(--strong)}
+.lx-dnote{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:12.5px;color:var(--muted)}
+
+/* ---------- 2. 任务：停止 ---------- */
+.ag-h .lx-stop{height:26px;padding:0 10px;font-size:12px}
+.ag-h .lx-stop:hover:not(:disabled){color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,var(--line2))}
+.ag-h .lx-stop:disabled{opacity:.7;color:var(--muted)}
+.lx-agw{margin:6px 0 0 14px;font-size:12.5px;color:var(--amber)}
+
+/* ---------- 3. 旁问 ---------- */
+#rpane.lx-rpn .rtabs{gap:2px;padding-left:8px;padding-right:8px}
+#rpane.lx-rpn .rtabs [data-tab]{flex:0 1 auto;min-width:max-content;padding:4px 8px;text-align:center}
+#rpane.lx-rpn .rtabs .grow{flex:1 1 0}
+#rbody:has(> .lx-btw){padding:0;overflow:hidden;display:flex;flex-direction:column}
+.lx-btw{flex:1;min-height:0;display:flex;flex-direction:column}
+.lx-qas{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 14px 14px;scrollbar-width:thin}
+.lx-bnote{font-size:12px;color:var(--dim);margin:0 2px 14px}
+.lx-qa{margin:0 0 18px;min-width:0}
+.lx-q{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;min-width:0}
+.lx-qt{flex:none;font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lx-qb{max-width:86%;min-width:0;background:var(--ubg);border:1px solid var(--uline);border-radius:12px;padding:6px 12px;color:var(--strong);font-size:13.5px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.lx-ans{margin:8px 2px 0;font-size:13.5px;min-width:0;overflow-wrap:anywhere}
+.lx-ans>:first-child{margin-top:0}
+.lx-ans>:last-child{margin-bottom:0}
+.lx-ans pre{max-width:100%;overflow-x:auto}
+.lx-ops{display:flex;gap:2px;margin:4px -6px 0}
+.lx-wait{display:flex;gap:4px;padding:12px 4px 4px}
+.lx-wait i{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:lxDot 1.2s ease-in-out infinite}
+.lx-wait i:nth-child(2){animation-delay:.15s}
+.lx-wait i:nth-child(3){animation-delay:.3s}
+@keyframes lxDot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.lx-berr{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 2px 0;font-size:12.5px;color:var(--amber)}
+.lx-berr>span{margin-right:2px}
+.lx-bin{flex:none;padding:10px 12px 12px;border-top:1px solid var(--line);background:var(--side)}
+.lx-box{display:flex;align-items:flex-end;gap:8px;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-l);padding:6px 6px 6px 12px;transition:border-color .12s ease,box-shadow .15s ease}
+.lx-box:focus-within{border-color:color-mix(in srgb,var(--accent) 45%,var(--line2));box-shadow:0 0 0 3px var(--accent-soft)}
+.lx-box textarea{flex:1;min-width:0;min-height:28px;max-height:132px;resize:none;border:0;outline:none;background:none;padding:4px 0;font:inherit;font-size:13.5px;line-height:20px;color:var(--strong)}
+.lx-box textarea::placeholder{color:var(--dim)}
+.lx-box textarea:disabled{cursor:not-allowed}
+.lx-send{position:relative;display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:var(--btn);color:var(--btn-fg);cursor:pointer;transition:background-color .12s ease,opacity .12s ease,transform .08s ease}
+.lx-send:hover:not(:disabled){background:var(--btn-h)}
+.lx-send:active:not(:disabled){transform:scale(.94)}
+.lx-send:disabled{opacity:.3;cursor:default}
+.lx-send .lx-i{width:14px;height:14px;stroke-width:1.8}
+.lx-send .lx-spin{display:none;position:absolute;width:12px;height:12px;border-color:color-mix(in srgb,var(--btn-fg) 35%,transparent);border-top-color:var(--btn-fg)}
+.lx-send.busy{opacity:.75}
+.lx-send.busy .lx-i{visibility:hidden}
+.lx-send.busy .lx-spin{display:block}
+
+/* ---------- 4. 记忆与指令（设置）；预览编辑 ---------- */
+.lx-mem{padding-top:4px}
+.lx-gh{font-size:12.5px;color:var(--muted);margin:16px 2px 6px}
+.sj-hd+.lx-mem .lx-gh:first-child{margin-top:10px}
+.lx-grp{border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;min-width:0}
+.lx-frow{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:10px 14px;border:0;border-top:1px solid var(--line);background:none;font:inherit;text-align:left;color:inherit;cursor:pointer;transition:background-color .12s ease}
+.lx-frow:first-child{border-top:0}
+.lx-frow:hover{background:var(--hover)}
+.lx-frow:active{background:var(--hover2)}
+.lx-frow:focus-visible{outline:2px solid var(--ring);outline-offset:-2px}
+.lx-frow>.lx-i:first-child{color:var(--muted)}
+.lx-frow .lx-fn{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;color:var(--strong)}
+.lx-frow .lx-fp{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px var(--mono);color:var(--dim)}
+.lx-frow .lx-ft{flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lx-frow>.lx-i:last-child{color:var(--dim)}
+.lx-frow.lx-none{cursor:default;color:var(--dim);font-size:13px}
+.lx-frow.lx-none:hover,.lx-frow.lx-none:active{background:none}
+.lx-pvh{display:flex;align-items:flex-start;gap:8px;min-width:0;margin-bottom:4px}
+.lx-pvh>.pv-head{flex:1;min-width:0;margin-bottom:0}
+.lx-pvb{display:flex;gap:6px;flex:none}
+#rbody:has(> .lx-edw){display:flex;flex-direction:column}
+.lx-edw{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.lx-ed{flex:1;min-height:240px;width:100%;resize:none;margin:0;padding:10px 14px;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line2));border-radius:var(--r-m);
+  background:var(--bg);color:var(--fg);font:12.5px/1.75 var(--mono);outline:none;box-shadow:0 0 0 3px var(--accent-soft);tab-size:2}
+.lx-conf{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px 10px;border-radius:var(--r);font-size:12.5px;color:var(--fg2);
+  background:color-mix(in srgb,var(--amber) 10%,transparent);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent)}
+.lx-conf>.lx-i{color:var(--amber)}
+.lx-conf>span{flex:1;min-width:120px}
+
+/* ---------- 6. 左栏筛选 ---------- */
+.lx-fbtn{display:grid;place-items:center;flex:none;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer;
+  transition:background-color .12s ease,color .12s ease,transform .08s ease}
+.lx-fbtn:hover,.lx-fbtn.open{background:var(--hover2);color:var(--strong)}
+.lx-fbtn:active{transform:scale(.95)}
+.lx-fbtn.act{color:var(--accent);background:var(--accent-soft)}
+.lx-fbtn.act:hover,.lx-fbtn.act.open{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.lx-sempty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 12px;color:var(--dim);font-size:12.5px;text-align:center}
+
+/* ---------- 7. 顶栏“用…打开” ---------- */
+.lx-ow{display:inline-flex;align-items:center;flex:none;height:30px;border-radius:var(--r);margin-right:2px;transition:background-color .12s ease}
+.lx-ow[hidden],.lx-ow-c[hidden]{display:none}
+.lx-ow:hover,.lx-ow.open{background:var(--hover)}
+#top .lx-ow .lx-ow-m{width:28px;border-radius:var(--r) 0 0 var(--r)}
+#top .lx-ow.solo .lx-ow-m{width:30px;border-radius:var(--r)}
+.lx-ow-c{display:grid;place-items:center;flex:none;width:16px;height:30px;padding:0 2px 0 0;border:0;border-radius:0 var(--r) var(--r) 0;background:none;color:var(--muted);cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.lx-ow-c:hover,.lx-ow.open .lx-ow-c{background:var(--hover2);color:var(--strong)}
+.lx-ow .lx-ow-m .lx-i{width:16px;height:16px}
+
+@media (prefers-reduced-motion:reduce){
+  .lx-spin,.lx-wait i{animation:none}
+  .lx-wait i{opacity:.6}
+  .lx-btn,.lx-ghost,.lx-seg button,.lx-rvr,.lx-rvr>.lx-chev,.lx-more,.lx-box,.lx-send,.lx-frow,.lx-fbtn,.lx-ow,.lx-ow-c{transition:none}
+}

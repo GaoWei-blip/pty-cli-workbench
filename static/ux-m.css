@@ -1,0 +1,22 @@
+/* 第十五轮 G：网页预览“点选元素”按钮与点选中的预览框（颜色只用 theme.css 变量） */
+.wpk-btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.wp-bar:has(.wpk-btn) .fx-in{flex-basis:150px}
+.wpk-btn .wpk-ic{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;color:var(--muted);transition:color .12s ease}
+.wpk-btn:hover:not([aria-disabled=true]) .wpk-ic{color:var(--strong)}
+.wpk-btn.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 42%,transparent);color:var(--accent)}
+.wpk-btn.on:hover{background:color-mix(in srgb,var(--accent) 18%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.wpk-btn.on .wpk-ic,.wpk-btn.on:hover .wpk-ic{color:var(--accent)}
+.wpk-btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
+.wpk-btn[aria-disabled=true]{opacity:.45;cursor:default}
+.wpk-btn[aria-disabled=true]:hover{background:var(--surface);border-color:var(--line2)}
+.wpk-btn[aria-disabled=true]:active{transform:none}
+.wpk-btn.busy{cursor:progress}
+.wpk-btn.busy .wpk-ic svg{display:none}
+.wpk-btn.busy .wpk-ic::before{content:"";width:11px;height:11px;box-sizing:border-box;border:1.5px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:wpk-spin .7s linear infinite}
+@keyframes wpk-spin{to{transform:rotate(360deg)}}
+.wp-frame{transition:border-color .15s ease,box-shadow .15s ease}
+.wp-frame.wpk-picking{border-color:color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 0 0 3px var(--accent-soft)}
+@media (prefers-reduced-motion: reduce){
+  .wpk-btn .wpk-ic,.wp-frame{transition:none}
+  .wpk-btn.busy .wpk-ic::before{animation-duration:2s}
+}

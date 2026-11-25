@@ -1,0 +1,240 @@
+/* 第十七轮 U：设置“额度与速度”页、侧栏底部额度小条。
+   布局移植自 T3 Code（MIT，Copyright (c) 2026 T3 Tools Inc.）：apps/web/src/components/usage/UsageLimits.tsx（WindowBar 的条、缺口、刻度）、
+   UsagePage.tsx（UsageOverview 两栏、Totals、明细表）、UsageProviderChart.tsx（图表尺寸、坐标轴、悬停提示）、UsageShareBar.tsx、
+   apps/web/src/components/chat/ThreadDetailsUsage.tsx（侧栏小条：3px 细条、9px 刻度）。
+   颜色全部用 theme.css 的变量；类名一律 uu- 开头。 */
+
+/* ---------- 顶部：提供方、时段、刷新 ---------- */
+.uu-page{min-width:0}
+.uu-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:4px 0 6px;min-width:0}
+.uu-top .grow{flex:1}
+.uu-upd{color:var(--dim);font-size:12px;white-space:nowrap}
+.uu-upd:empty{display:none}
+.uu-rf{flex:none;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:var(--r);background:none;color:var(--muted);cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.uu-rf:hover{background:var(--hover2);color:var(--strong)}
+.uu-rf.spin .uu-i{animation:sjSpin .8s linear infinite}
+.uu-i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- 三块：额度、速度、用量 ---------- */
+.uu-sec{min-width:0}
+.uu-h{display:flex;align-items:center;gap:10px;margin:22px 2px 10px;font-size:14px;font-weight:600;color:var(--strong)}
+.uu-sec:first-of-type .uu-h{margin-top:14px}
+.uu-scan{font-size:12px;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+.uu-scan[hidden]{display:none}
+.uu-h4{margin:18px 2px 8px;font-size:13px;font-weight:600;color:var(--strong)}
+.uu-ch{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0}
+.uu-ch h4{margin:0;font-size:13px;font-weight:600;color:var(--strong);min-width:0}
+.uu-ch .grow{flex:1}
+.uu-ch .sj-seg{font-weight:400}
+.uu-ch .uu-h4{margin:0}
+.uu-brkh,.uu-rkh{margin:18px 0 8px}
+.uu-brkh .uu-h4,.uu-rkh .uu-h4{margin-left:2px}
+.uu-empty{color:var(--dim);padding:22px 14px;text-align:center;font-size:12.5px}
+.uu-empty.sm{padding:14px}
+.uu-card{min-width:0;border:1px solid var(--line);border-radius:var(--r-l);padding:14px 16px;margin:14px 0 0;background:var(--surface)}
+.uu-dot{flex:none;display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--uu-c,var(--muted))}
+/* 11-22 晚口径：Claude 用量只算工作台，在 Claude 一栏注明 */
+.uu-scope{flex:none;font-size:11px;font-style:normal;font-weight:400;line-height:1.3;color:var(--dim);white-space:nowrap}
+.uu-pkh .uu-scope,.uu-rkh .uu-scope{margin-left:-2px}
+.uu-slg .uu-scope,.uu-lg .uu-scope{margin-left:-2px}
+
+/* ---------- 额度卡（T3 LimitWindows：11rem | 条 | 7rem） ---------- */
+.uu-qc{--uu-c:var(--muted);min-width:0;border:1px solid var(--line);border-radius:var(--r-l);padding:14px 16px 12px;margin-bottom:10px;background:var(--surface)}
+.uu-qh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;margin-bottom:8px;font-size:13px}
+.uu-qh b{font-weight:600;color:var(--strong);white-space:nowrap}
+.uu-qh .grow{flex:1}
+.uu-plan{flex:none;padding:0 6px;border-radius:5px;font-size:11px;line-height:17px;background:var(--raise);color:var(--muted)}
+.uu-qm{display:inline-flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:2px 8px;min-width:0;max-width:100%;margin-left:auto;font-size:12px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.uu-chk{display:inline-flex;align-items:center;color:var(--muted)}
+.uu-stale{color:var(--amber)}
+.uu-proxy{margin:-2px 0 8px;font-size:12px;color:var(--amber)}
+.uu-why{margin:-2px 0 8px;font-size:12.5px;color:var(--muted)}
+.uu-out{margin:-2px 0 8px;font-size:12.5px;color:var(--red)}
+.uu-ws{display:grid;grid-template-columns:minmax(0,16rem) minmax(0,1fr) max-content;align-items:center;gap:4px 16px}
+.uu-w{display:contents}
+.uu-wl{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px}
+.uu-wl .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.uu-left{margin-left:auto;flex:none;font-weight:500;color:var(--strong);font-variant-numeric:tabular-nums}
+.uu-wr{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.uu-reset{margin-left:auto;flex:none}
+/* 条：24px 高的命中区，里面 12px 的轨道；剩余部分用提供方的颜色；刻度 2px 宽、16px 高 */
+.uu-bar{position:relative;height:24px;min-width:0;border-radius:999px;cursor:default;outline:none}
+.uu-bar:focus-visible{box-shadow:inset 0 0 0 2px var(--ring)}
+.uu-gap{position:absolute;inset:0}
+.uu-gap .trk{position:absolute;left:0;right:0;top:8px;bottom:8px;border-radius:999px;background:var(--raise)}
+.uu-gap .fill{position:absolute;left:0;top:8px;bottom:8px;border-radius:999px;background:var(--uu-c)}
+.uu-tick{position:absolute;top:5px;bottom:5px;width:2px;border-radius:999px;transform:translateX(-50%);background:var(--fg)}
+.uu-pace{display:inline-flex;color:var(--muted);cursor:default}
+.uu-pace .uu-i{width:14px;height:14px}
+.uu-qx{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.uu-rc{display:inline-flex;align-items:center;gap:5px}
+.uu-rc .uu-i{width:13px;height:13px}
+/* 拿不到：卡片变灰，保留最近一次的值 */
+.uu-qc.uu-off{background:color-mix(in srgb,var(--fg) 2.5%,transparent)}
+.uu-qc.uu-off .uu-dot{background:var(--dim)}
+.uu-qc.uu-off .uu-ws{filter:grayscale(1);opacity:.55}
+
+/* ---------- 速度表、明细表、最近 20 轮（T3 的表格：表头淡色细线，数字右对齐等宽） ---------- */
+.uu-tbl{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:auto}
+.uu-tbl th{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--dim);font-weight:400;font-size:12px;text-align:right;white-space:nowrap}
+.uu-tbl td{padding:7px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);color:var(--fg2);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.uu-tbl tr:last-child td{border-bottom:0}
+.uu-tbl tbody tr:hover td{background:color-mix(in srgb,var(--hover) 70%,transparent)}
+.uu-tbl .l{text-align:left}
+.uu-tbl td.strong{color:var(--strong)}
+.uu-mn{display:inline-flex;align-items:center;gap:7px;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.uu-spd tr.pv td{color:var(--strong);font-weight:500;border-top:1px solid var(--line)}
+.uu-spd tbody tr.pv:first-child td{border-top:0}
+.uu-spd tr.mr td:first-child{padding-left:23px;color:var(--fg2)}
+.uu-spd td:first-child{max-width:0;width:34%;overflow:hidden;text-overflow:ellipsis}
+.uu-na{color:var(--dim);cursor:help;border-bottom:1px dotted color-mix(in srgb,var(--dim) 60%,transparent)}
+.uu-approx{color:var(--muted)}
+.uu-rec{table-layout:fixed}
+.uu-rec .c-t{width:56px;color:var(--muted)}
+.uu-rec .c-m{width:22%}
+.uu-rec .c-n{width:62px}
+.uu-rec td{overflow:hidden;text-overflow:ellipsis}
+.uu-rec .c-c .sj-link,.uu-tt{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uu-tt{color:var(--fg2)}
+.uu-days .c-t{width:88px}
+.uu-mt td:nth-child(2){white-space:normal}
+.uu-mt .c-i{width:22px;color:var(--dim);font-size:11.5px}
+.uu-mt .uu-mn{color:var(--fg)}
+.uu-mb{height:2px;max-width:12rem;margin-top:6px}
+.uu-mb i{display:block;height:100%;border-radius:999px}
+
+/* ---------- 图表（T3 UsageProviderChart：左侧刻度、网格线、分层面积、悬停竖线和提示） ---------- */
+.uu-chart{--uu-yw:48px;display:flex;flex-direction:column;gap:4px;min-width:0;margin-top:10px}
+.uu-cw{display:flex;gap:8px;min-width:0}
+.uu-yax{position:relative;flex:none;width:calc(var(--uu-yw) - 8px);height:var(--uu-ph,180px)}
+.uu-yax span{position:absolute;right:0;transform:translateY(-50%);font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.uu-plot{position:relative;flex:1;min-width:0;height:var(--uu-ph,180px);touch-action:pan-y}
+.uu-plot svg{display:block;width:100%;height:100%;overflow:visible}
+.uu-gl{stroke:var(--line);stroke-width:1}
+.uu-hl{stroke:var(--muted);stroke-width:1;visibility:hidden}
+.uu-hl.on{visibility:visible}
+.uu-dotp{stroke-width:5;stroke-linecap:round;fill:none}
+.uu-xax{display:flex;justify-content:space-between;padding-left:var(--uu-yw);font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.uu-xax span{white-space:nowrap}
+.uu-lg{display:flex;flex-wrap:wrap;gap:3px 14px;padding-left:var(--uu-yw);font-size:11.5px;color:var(--muted);min-width:0}
+.uu-lg span{display:inline-flex;align-items:center;gap:5px;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uu-lg i{flex:none;width:8px;height:8px;border-radius:2px}
+.uu-sch{--uu-ph:150px}
+.uu-ctip{position:absolute;z-index:2;min-width:140px;max-width:100%;padding:7px 10px;border-radius:var(--r-m);pointer-events:none;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid var(--line2);box-shadow:var(--sh2);font-size:12px;line-height:1.55;box-sizing:border-box}
+.uu-ctip[hidden]{display:none}
+.uu-ctip .t{margin-bottom:2px;color:var(--muted)}
+.uu-ctip .r{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.uu-ctip .r span{display:inline-flex;align-items:center;gap:6px;min-width:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uu-ctip .r i{flex:none;width:7px;height:7px;border-radius:2px}
+.uu-ctip .r b{font-weight:500;color:var(--strong);font-variant-numeric:tabular-nums;white-space:nowrap}
+.uu-ctip .tot{margin-top:3px;padding-top:3px;border-top:1px solid var(--line)}
+
+/* ---------- 用量：各家指标卡（第十四轮的四项），T3 两栏总览、总计、占比条 ---------- */
+.uu-pks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:6px}
+.uu-pk{--uu-c:var(--muted);min-width:0;border:1px solid var(--line);border-radius:var(--r-l);padding:10px 12px}
+.uu-pkh{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;margin-bottom:6px;font-size:13px}
+.uu-pkh b{font-weight:600;color:var(--strong);white-space:nowrap}
+.uu-pkh .s{margin-left:auto;font-size:11.5px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.uu-kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px 10px}
+.uu-k{min-width:0}
+.uu-k .k{font-size:11.5px;color:var(--muted)}
+.uu-k .v{font-size:17px;font-weight:600;line-height:1.4;color:var(--strong);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uu-k .d{font-size:11px;line-height:1.45;color:var(--dim);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.uu-pkscan{display:flex;align-items:center;padding:14px 0 8px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.uu-ov{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr);gap:24px;margin-top:16px;min-width:0}
+.uu-ovl{display:flex;flex-direction:column;gap:12px;min-width:0}
+.uu-big{font-size:32px;font-weight:600;line-height:1.15;color:var(--strong);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.uu-bigs{margin-top:-8px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.uu-ovr{min-width:0}
+.uu-share{display:flex;flex-direction:column;gap:9px;min-width:0}
+.uu-share h5{margin:0;font-size:12.5px;font-weight:500;color:var(--strong)}
+.uu-sbarw{display:flex;gap:2px;height:8px}
+.uu-sbarw i{min-width:4px;height:100%;border-radius:2px}
+.uu-sbarw i:first-child{border-top-left-radius:999px;border-bottom-left-radius:999px}
+.uu-sbarw i:last-child{border-top-right-radius:999px;border-bottom-right-radius:999px}
+.uu-slg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;padding:0;list-style:none;font-size:12px}
+.uu-slg li{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.uu-slg i{flex:none;width:8px;height:8px;border-radius:2px}
+.uu-slg .l{color:var(--muted);white-space:nowrap}
+.uu-slg .v{color:var(--strong);font-variant-numeric:tabular-nums;white-space:nowrap}
+.uu-ubody>.uu-share{margin-top:18px}
+.uu-tot{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 20px;margin:0 2px;padding:2px 0}
+.uu-tot div{min-width:0}
+.uu-tot dt{font-size:11.5px;color:var(--muted)}
+.uu-tot dd{margin:1px 0 0;font-size:15px;font-weight:500;color:var(--strong);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 对话排行：沿用第十四轮“用量最多的对话”的行（.sj-sess .sr），前面加提供方圆点 */
+.uu-rank{margin:0}
+.uu-rank .sr:first-child{border-top:0}
+.uu-rt{display:flex;align-items:center;gap:7px;min-width:0}
+.uu-rt .sj-link,.uu-rt .uu-tt{min-width:0}
+.uu-rt .sj-tag{flex:none;margin-left:0}
+.uu-roll{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--fg2);cursor:pointer;user-select:none}
+.uu-roll input{margin:0;width:14px;height:14px;accent-color:var(--run);cursor:pointer}
+
+/* ---------- 悬停提示（设置页和侧栏共用，样子同第十四轮 .sj-tip） ---------- */
+.uu-tip{position:fixed;z-index:75;display:flex;flex-direction:column;max-width:300px;padding:6px 10px;border-radius:var(--r);pointer-events:none;
+  background:var(--surface);border:1px solid var(--line2);box-shadow:var(--sh2);color:var(--fg2);font-size:12px;line-height:1.55;font-variant-numeric:tabular-nums}
+.uu-tip[hidden]{display:none}
+.uu-tip b{font-weight:500;color:var(--strong)}
+
+/* ---------- 11-23：Claude 卡恢复第十四轮老额度卡（样式沿用 ux-j.css 的 .sj-qcard/.sj-q*），右侧数字改成“剩余 X%”，列宽放宽一点 ---------- */
+.uu-qbody .uu-qold{margin:0 0 10px}
+.uu-qbody .uu-qold .sj-q{grid-template-columns:64px minmax(80px,1fr) 72px minmax(0,max-content)}
+@container (max-width:520px){.uu-qbody .uu-qold .sj-q{grid-template-columns:56px minmax(60px,1fr) 64px}}
+
+/* ---------- 窄宽度：按设置内容区的容器宽度换行，不出横向滚动 ---------- */
+@container (max-width:720px){
+  .uu-ov{grid-template-columns:minmax(0,1fr);gap:16px}
+  .uu-tot{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container (max-width:560px){
+  .uu-ws{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .uu-w{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r" "b b";gap:0 10px}
+  .uu-wl{grid-area:l}.uu-wr{grid-area:r}.uu-bar{grid-area:b}
+  .uu-wl .uu-left{margin-left:8px}
+  .uu-tbl .o1{display:none}
+  .uu-qc{padding:10px 12px}
+  .uu-chart{--uu-yw:40px}
+}
+@container (max-width:440px){
+  .uu-tbl .o2{display:none}
+  .uu-tbl th,.uu-tbl td{padding-left:5px;padding-right:5px}
+  .uu-spd tr.mr td:first-child{padding-left:14px}
+  .uu-rec .c-t{width:42px}
+  .uu-rec .dd{display:none}
+  .uu-rec .c-n{width:50px}
+  .uu-tot{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .uu-pks{grid-template-columns:minmax(0,1fr)}
+  .uu-big{font-size:26px}
+  .uu-rank .sr{grid-template-columns:minmax(0,1fr) 52px 62px}
+  .uu-rank .sr .n:nth-child(2){display:none}
+}
+@container (max-width:300px){
+  .uu-w{grid-template-areas:"l l" "b b" "r r"}
+  .uu-wl .uu-left{margin-left:auto}
+  .uu-wr .uu-reset{margin-left:0}
+  .uu-rec .c-m{width:30%}
+  .uu-wr .uu-reset{font-size:11px}
+  .uu-page .sj-seg button{padding:2px 7px}
+  .uu-card{padding:10px}
+  .uu-tbl{font-size:11.5px}
+  .uu-tbl th,.uu-tbl td{padding-left:3px;padding-right:3px}
+  .uu-spd tr.mr td:first-child{padding-left:8px}
+}
+@media (prefers-reduced-motion:reduce){.uu-rf.spin .uu-i{animation-duration:2.4s}}
+/* ---------- 11-23：只看 Claude 时整页是第十四轮老“用量”页，提供方切换和额度卡按老页面的间距 ---------- */
+.uu-top.uu-top-old{margin:0 0 12px}
+.uu-qbody.uu-qbody-old .uu-qold{margin:0 0 16px}
+/* ---------- 11-23：Codex、Antigravity 也用第十四轮老样式页（额度卡照老卡；长窗口名的卡把第一列放宽）；老页面里活跃度、对话排行的小补充 ---------- */
+.uu-qold .sj-qh .uu-qplan{font-style:normal;font-weight:500;font-size:11px;line-height:16px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.uu-qbody .uu-qold:not([data-p=claude]) .sj-q{grid-template-columns:64px minmax(80px,1fr) 72px 168px}  /* 多行时右侧文字定宽，各行进度条对齐 */
+.uu-qbody .uu-qold.uu-qwide .sj-q{grid-template-columns:minmax(64px,216px) minmax(80px,1fr) 72px 168px}  /* 名字列可收缩：中等宽度下不把右侧挤出卡片 */
+.uu-qold.uu-qwide .sj-qn{overflow:hidden;text-overflow:ellipsis}
+@container (max-width:520px){.uu-qbody .uu-qold:not([data-p=claude]) .sj-q{grid-template-columns:56px minmax(60px,1fr) 64px}.uu-qbody .uu-qold.uu-qwide .sj-q{grid-template-columns:116px minmax(60px,1fr) 64px}}
+.uu-qold .uu-qfoot{padding-top:6px}
+.sj-hnote{font-weight:400;font-size:12px;color:var(--dim)}
+.sj-heat i[data-na]{opacity:.45}
+.sj-snm{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg)}
+@container (max-width:300px){.uu-top-old .sj-seg button{padding:2px 7px}}  /* 和“全部”页同样的窄屏紧凑写法，手机宽度不横向滚动 */

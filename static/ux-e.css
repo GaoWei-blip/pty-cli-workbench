@@ -1,0 +1,8 @@
+/* 第十三轮 E：上次回复被中断、左栏“可继续”。不加动画 */
+#feed .ux-intr{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;color:var(--muted);font-size:13px;min-width:0}
+#feed .ux-intr:before{background:var(--dim)}
+#feed .ux-intr .ux-intr-go{border:1px solid var(--line2);background:var(--surface);color:var(--fg2);border-radius:999px;padding:1px 12px;font-size:12.5px;line-height:20px;font-family:var(--sans)}
+#feed .ux-intr .ux-intr-go:hover{color:var(--strong);background:var(--raise)}
+#feed .ux-intr .ux-intr-go:disabled{opacity:.5}
+.srow .ux-resume{flex:none;font-size:11px;line-height:16px;padding:0 6px;border-radius:999px;color:var(--accent);background:var(--accent-soft);white-space:nowrap}
+.srow:hover .ux-resume{display:none}

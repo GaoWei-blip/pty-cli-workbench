@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""第十七轮 U：假的 agy 命令（放进 PATH 或用 CWB_AGY_BIN 指定），只认 `agy -p "/quota" --output-format json`。
+环境变量 FAKEAGY_MODE：ok（默认）| apikey（退出码 2）| timeout（一直不退出）| bad（输出不是 JSON）| nowin（没有窗口）
+FAKEAGY_LOG=文件：每次调用记一行（参数、当前目录）。"""
+import json, os, sys, time
+from datetime import datetime, timedelta, timezone
+log = os.environ.get('FAKEAGY_LOG')
+if log:
+    with open(log, 'a', encoding='utf-8') as f:
+        f.write(json.dumps({'argv': sys.argv[1:], 'cwd': os.getcwd(), 'pid': os.getpid()}) + '\n')
+mode = os.environ.get('FAKEAGY_MODE') or 'ok'
+if sys.argv[1:] != ['-p', '/quota', '--output-format', 'json']:
+    sys.stderr.write('fakeagy: 只支持 /quota\n'); sys.exit(1)
+if mode == 'apikey':
+    sys.stderr.write('Error: /quota is not available when signed in with an API key\n'); sys.exit(2)
+if mode == 'timeout':
+    time.sleep(3600); sys.exit(0)
+if mode == 'bad':
+    print('not json'); sys.exit(0)
+now = datetime.now(timezone.utc)
+iso = lambda d: d.strftime('%Y-%m-%dT%H:%M:%SZ')
+groups = [] if mode == 'nowin' else [
+    {'name': 'Gemini Models', 'buckets': [
+        {'id': 'gemini-weekly', 'name': 'Weekly Limit Remaining', 'description': 'used some', 'window': 'weekly', 'remaining_fraction': 0.15,
+         'reset_time': iso(now + timedelta(days=1))},
+        {'id': 'gemini-5h', 'name': 'Five Hour Limit Remaining', 'description': 'used some', 'window': '5h', 'remaining_fraction': 0.9,
+         'reset_time': iso(now + timedelta(hours=2))}]},
+    {'name': 'Claude and GPT models', 'buckets': [
+        {'id': '3p-weekly', 'name': 'Weekly Limit Remaining', 'window': 'weekly', 'remaining_fraction': 1, 'reset_time': iso(now + timedelta(days=7))},
+        {'id': '3p-5h', 'name': 'Five Hour Limit Remaining', 'window': '5h', 'remaining_fraction': 1, 'reset_time': iso(now + timedelta(hours=5))}]}]
+print(json.dumps({'conversation_id': '', 'status': 'SUCCESS', 'response': '', 'num_turns': 0,
+                  'command': {'name': 'usage', 'data': {'description': 'x', 'groups': groups}}}))

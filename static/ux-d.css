@@ -1,0 +1,51 @@
+/* ==========================================================================
+   第十二轮 D：过程折叠、回复操作条、排队与立即发送、工具图标
+   时间线里的元素不加动画、不加过渡；只有回复操作条用 120ms 透明度显隐（它浮在条目上，不占布局）。
+   颜色全部用 theme.css 的变量。
+   ========================================================================== */
+
+/* ---------- 过程折叠 ---------- */
+#feed .dz-h{display:none!important}
+#feed .dz-row{position:relative;display:flex;align-items:center;gap:6px;width:fit-content;max-width:100%;min-width:0;
+  margin:12px 0 12px -6px;padding:1px 9px 1px 6px;border-radius:var(--r-s);color:var(--muted);font-size:13px;line-height:22px;
+  cursor:pointer;user-select:none;-webkit-user-select:none;font-variant-numeric:tabular-nums}
+#feed .dz-row:before{content:"";position:absolute;left:-18px;top:8.5px;width:7px;height:7px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 3px var(--tl-bg,var(--bg))}
+#feed .dz-row:hover{color:var(--strong);background:var(--hover)}
+#feed .dz-row:focus-visible{outline:2px solid var(--ring);outline-offset:1px}
+#feed .dz-row .dz-chev{flex:none;width:10px;height:10px;background:currentColor;transform:rotate(-90deg);
+  -webkit-mask:var(--ic-chev) center/10px 10px no-repeat;mask:var(--ic-chev) center/10px 10px no-repeat}
+#feed .dz-row.open .dz-chev{transform:none}
+#feed .dz-row .dz-n{font-weight:500}
+#feed .dz-row .dz-t{color:var(--dim)}
+#feed .dz-row .dz-t:empty{display:none}
+#feed .dz-row:hover .dz-t{color:var(--muted)}
+
+/* ---------- 最终回复的悬停操作条 ---------- */
+#feed .dz-final>.cp{display:none}
+#feed .dz-bar{position:absolute;top:-6px;right:0;z-index:2;display:flex;gap:1px;padding:2px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh1);opacity:0;pointer-events:none;transition:opacity .12s ease}
+#feed .dz-bar.on,#feed .dz-bar:focus-within{opacity:1;pointer-events:auto}
+#feed .dz-bar button{border:0;background:transparent;color:var(--muted);font:12px/22px var(--sans);padding:0 8px;border-radius:var(--r-s);white-space:nowrap;cursor:pointer}
+#feed .dz-bar button:hover{color:var(--strong);background:var(--hover2)}
+/* 开发线 A 的“从这里分叉”并进操作条：有操作条的轮次不再在结束行里重复显示 */
+#feed [data-dzbar] .fk{display:none}
+
+/* ---------- 发送：排队 / 立即发送 ---------- */
+#send.queue{width:auto;padding:0 15px;border-radius:999px;font-size:13px;line-height:32px;font-weight:500;white-space:nowrap}
+#send.queue:before{display:none}
+#sendNow{flex:none;height:32px;margin:0 6px 0 auto;padding:0 13px;border:1px solid var(--line2);border-radius:999px;background:transparent;
+  color:var(--fg2);font-size:13px;line-height:30px;white-space:nowrap;cursor:pointer;
+  transition:background-color .12s ease,color .12s ease,border-color .12s ease}
+#sendNow:hover{background:var(--hover2);color:var(--strong)}
+#sendNow:active{transform:scale(.97)}
+#sendNow[hidden]{display:none}
+#sendNow:not([hidden])+#send{margin-left:0}  /* 窄窗口换行时两个按钮一起靠右 */
+
+/* ---------- 工具图标与增删行数 ---------- */
+.head .dz-ti{display:inline-block;width:14px;height:14px;margin:0 6px 0 0;vertical-align:-2px;fill:none;stroke:var(--muted);
+  stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.head .dz-ln{margin-left:8px;font:500 12px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.head .dz-ln b{font-weight:500}
+.head .dz-ln b+b{margin-left:6px}
+.head .dz-ln .a{color:var(--green)}
+.head .dz-ln .d{color:var(--red)}

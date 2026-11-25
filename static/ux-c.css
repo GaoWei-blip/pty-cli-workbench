@@ -1,0 +1,44 @@
+/* 第十二轮 C：布局与导航。颜色全部沿用 theme.css 的变量；时间线（#feed）里不加任何动画或过渡。 */
+
+/* ---------- 分隔线：右栏左边缘、左栏右边缘，悬停时显示高亮竖线 ---------- */
+#rgrip{z-index:6}
+#rgrip::after,#uxLgrip::after{content:"";position:absolute;top:0;bottom:0;left:2px;width:2px;background:var(--accent);opacity:0;transition:opacity .12s ease .06s;pointer-events:none}
+#rgrip:hover::after,body.ux-rdrag #rgrip::after,#uxLgrip:hover::after,body.ux-ldrag #uxLgrip::after{opacity:.7}
+body.ux-rdrag,body.ux-ldrag,body.ux-rdrag *,body.ux-ldrag *{cursor:col-resize!important;-webkit-user-select:none;user-select:none}
+body.ux-rdrag iframe,body.ux-ldrag iframe{pointer-events:none}
+
+/* ---------- 右栏放大 / 还原：铺满主区，左栏保留 ---------- */
+#uxRmax,#uxSideBtn{display:inline-flex;align-items:center;justify-content:center;flex:none}
+#uxRmax svg,#uxSideBtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+#uxRmax svg{width:15px;height:15px}
+body.ux-rpmax.rp #main{display:none}
+body.ux-rpmax #rpane{flex:1 1 auto;width:auto!important}
+body.ux-rpmax #rgrip{display:none}
+
+/* ---------- 左栏：收起 / 展开（只给侧栏容器加宽度过渡）、拖宽 ---------- */
+#side{position:relative}
+body.ux-sidet #side{transition:width .15s ease}  /* 只在收起/展开那一下有过渡；拖宽、窗口缩放时立即生效 */
+body.ux-sidec #side{width:0!important;border-right-width:0;visibility:hidden;
+  transition:width .15s ease,border-right-width 0s linear .15s,visibility 0s linear .15s}
+body.ux-notr #side,body.ux-ldrag #side{transition:none!important}
+body.ux-sidec #side,body.ux-sidet #side{overflow:hidden}
+body.ux-sidec #side>:not(#uxLgrip),body.ux-sidet #side>:not(#uxLgrip){min-width:var(--ux-sw,272px)}
+#uxLgrip{position:absolute;top:0;bottom:0;right:-3px;width:6px;cursor:col-resize;z-index:6}
+body.ux-sidec #uxLgrip,body.ux-sidet #uxLgrip{display:none}
+#uxSideBtn{width:28px;height:28px;margin:0 6px 0 -8px;color:var(--muted)}
+body.nosess #uxSideBtn{visibility:visible}
+
+/* ---------- 提问刻度轨：滚动条左边一条窄轨，不挡滚动条、不占布局 ---------- */
+#uxRail{position:absolute;right:10px;width:10px;z-index:2;pointer-events:none}
+#uxRail[hidden]{display:none}
+#uxRail i{position:absolute;left:0;right:0;height:8px;margin-top:-4px;pointer-events:auto;cursor:pointer}
+#uxRail i::before{content:"";position:absolute;left:2px;right:1px;top:3px;height:2px;border-radius:1px;background:color-mix(in srgb,var(--accent) 50%,transparent)}
+#uxRail i:hover::before{left:0;right:0;background:var(--accent)}
+#uxTip{position:fixed;z-index:60;max-width:min(360px,60vw);padding:4px 10px;border-radius:var(--r-s);background:var(--surface);
+  border:1px solid var(--line2);box-shadow:var(--sh2);color:var(--fg);font-size:12.5px;line-height:1.55;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#uxTip[hidden]{display:none}
+
+/* ---------- 左栏：有新回复的圆点、进行中的已用时间 ---------- */
+.srow .ux-unread{flex:none;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.srow .stime[data-ux]{color:var(--run);opacity:1;font-weight:500}

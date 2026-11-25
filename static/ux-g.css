@@ -1,0 +1,12 @@
+/* 第十三轮 G：别的对话请求打开文件或网页时的提示（ux-g.js） */
+#gToast{position:fixed;left:50%;bottom:calc(var(--toast-b,24px) + 48px);transform:translateX(-50%);z-index:21;display:flex;align-items:center;gap:8px;
+  max-width:min(560px,calc(100vw - 32px));box-sizing:border-box;padding:7px 8px 7px 16px;border-radius:999px;
+  background:var(--surface);color:var(--fg);border:1px solid var(--line2);box-shadow:var(--sh3);font-size:13px;line-height:1.4}
+#gToast[hidden]{display:none}
+#gToast:not([hidden]){animation:cwbToast .2s cubic-bezier(.2,.8,.2,1)}
+#gToast .gt-txt{min-width:0;flex:1 1 auto;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#gToast .gt-txt b{color:var(--strong);font-weight:600}
+#gToast .gt-what{color:var(--fg2);font-family:var(--mono);font-size:12px}
+#gToast .gt-dot{color:var(--dim);flex:none}
+#gToast .gt-go{flex:none;background:var(--accent-soft);color:var(--accent);border:0;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+#gToast .gt-go:hover{background:var(--accent);color:var(--btn-fg)}

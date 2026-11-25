@@ -1,0 +1,10 @@
+.venv/
+.run/
+.bak/
+config.json
+data/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.app/

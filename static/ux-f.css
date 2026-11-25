@@ -1,0 +1,54 @@
+/* ==========================================================================
+   第十三轮 F：出错恢复按钮、对话内查找、表格复制、撤销 toast、完成提示音开关
+   时间线里的元素不加动画、不加过渡；颜色全部沿用 theme.css 的变量（撤销 toast 与 #toast 同色）。
+   ========================================================================== */
+
+/* ---------- F3 出错后的恢复按钮 ---------- */
+#feed .f3-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+#feed .f3-acts .btn:disabled{opacity:.45;cursor:default}
+#feed .f3-hint{color:var(--muted);font-size:12.5px;margin-left:4px}
+
+/* ---------- F5 对话内查找 ---------- */
+#fdBar{position:absolute;right:28px;z-index:6;display:flex;align-items:center;gap:2px;box-sizing:border-box;max-width:calc(100% - 40px);
+  padding:3px 4px 3px 12px;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-l);box-shadow:var(--sh2)}
+#fdBar[hidden]{display:none}
+#fdQ{flex:1 1 200px;width:200px;min-width:40px;border:0;outline:0;background:transparent;color:var(--strong);font-size:13px;line-height:26px;padding:0}
+#fdQ::placeholder{color:var(--dim)}
+#fdBar .fd-n{flex:none;min-width:34px;padding:0 6px;color:var(--muted);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#fdBar .fd-n:empty{display:none}
+#fdBar .fd-older{flex:none;border:0;background:transparent;color:var(--accent);font-size:12px;line-height:24px;padding:0 6px;border-radius:var(--r-s);white-space:nowrap;cursor:pointer}
+#fdBar .fd-older:hover:not(:disabled){background:var(--hover2)}
+#fdBar .fd-older:disabled{color:var(--muted);cursor:default}
+#fdBar .fd-older[hidden]{display:none}
+#fdBar .fd-ic{flex:none;width:26px;height:26px;display:grid;place-items:center;padding:0;border:0;background:transparent;border-radius:var(--r-s);color:var(--muted);cursor:pointer}
+#fdBar .fd-ic:hover{background:var(--hover2);color:var(--strong)}
+#fdBar .fd-ic svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+::highlight(cwbf-find){background-color:color-mix(in srgb,var(--amber) 30%,transparent)}
+::highlight(cwbf-find-cur){background-color:color-mix(in srgb,var(--amber) 72%,transparent);color:var(--strong)}
+
+/* ---------- F6 表格：悬停出“复制为 Markdown / CSV” ---------- */
+#feed .f6-tw{position:relative}
+#feed .md>.f6-tw:first-child>table{margin-top:0}
+#feed .md>.f6-tw:last-child>table{margin-bottom:0}
+#feed .f6-tb{position:absolute;top:4px;right:4px;z-index:2;display:flex;gap:1px;padding:2px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh1);opacity:0;pointer-events:none}
+#feed .f6-tw:hover>.f6-tb,#feed .f6-tb:focus-within{opacity:1;pointer-events:auto}
+#feed .f6-tb button{border:0;background:transparent;color:var(--muted);font:12px/22px var(--sans);padding:0 8px;border-radius:var(--r-s);white-space:nowrap;cursor:pointer}
+#feed .f6-tb button:hover{color:var(--strong);background:var(--hover2)}
+/* 表格在文字块最上面时，让开右上角的“复制”和回复操作条 */
+#feed .textblock>.md>.f6-tw:first-child>.f6-tb{top:30px}
+
+/* ---------- F7 撤销 toast（与 #toast 同样式，两个同时出现时它在上面） ---------- */
+#fUndo{position:fixed;left:50%;bottom:var(--toast-b,24px);transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);box-sizing:border-box;
+  background:var(--toast-bg,#1f1e1c);color:var(--toast-fg,#f5f4f0);border-radius:999px;padding:4px 6px 4px 18px;font-size:13px;line-height:24px;white-space:nowrap;
+  box-shadow:var(--toast-sh,0 8px 28px rgba(0,0,0,.22));border:1px solid var(--toast-line,rgba(255,255,255,.06))}
+#fUndo:not([hidden]){animation:cwbToast .2s cubic-bezier(.2,.8,.2,1)}
+#fUndo[hidden]{display:none}
+#fUndo i{font-style:normal;opacity:.5}
+#fUndo button{border:0;background:transparent;color:#93b6fa;font:inherit;font-weight:500;padding:0 10px;border-radius:999px;cursor:pointer}
+#fUndo button:hover{background:rgba(255,255,255,.1)}
+#toast:not([hidden])+#fUndo{bottom:calc(var(--toast-b,24px) + 44px)}  /* 第十四轮 FH：跟着 --toast-b（输入区上方）走，仍叠在 #toast 上面 */
+
+/* ---------- F13 “⋯”菜单里的完成提示音开关 ---------- */
+.mi.f13-mi{flex-direction:row;align-items:center;justify-content:space-between;gap:18px}
+.mi.f13-mi .f13-ck{font-style:normal;color:var(--accent)}

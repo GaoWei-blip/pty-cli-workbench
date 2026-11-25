@@ -1,0 +1,49 @@
+/* 第十六轮 P：Codex、Antigravity 对话 */
+:root{--pv-codex:#3f8f7a;--pv-agy:#5b7fd6}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--pv-codex:#6cc2a8;--pv-agy:#8aa8f0}}
+:root[data-theme=dark]{--pv-codex:#6cc2a8;--pv-agy:#8aa8f0}
+
+/* 首页：选哪家（问候语下面） */
+.pv-logo{display:block;width:98px;height:98px;margin:0 auto}
+.pv-logo-codex{color:var(--strong)}
+.pv-seg{display:none;gap:2px;padding:3px;margin:0 0 18px;background:var(--seg-bg);border-radius:10px}
+body.h-home .pv-seg{display:inline-flex}
+.pv-seg button{display:inline-flex;align-items:center;gap:6px;border:0;margin:0;padding:4px 14px;border-radius:7px;background:transparent;color:var(--muted);font:inherit;font-size:13px;line-height:20px;cursor:pointer;white-space:nowrap;transition:background-color .14s ease,color .14s ease}
+.pv-seg .pv-si{width:13px;height:13px;flex:none;display:block;opacity:.75;transition:opacity .14s ease}
+.pv-seg button.on .pv-si,.pv-seg button:hover .pv-si{opacity:1}
+.pv-seg button:hover{color:var(--strong)}
+.pv-seg button.on{background:var(--seg-on);color:var(--strong);box-shadow:var(--seg-sh);font-weight:500}
+.pv-seg button:focus-visible{outline:2px solid var(--ring);outline-offset:0}
+.pv-hint{display:none;margin:-10px 0 16px;font-size:12.5px;color:var(--muted);text-align:center;max-width:520px;line-height:1.5}
+body.h-home .pv-hint:not([hidden]){display:block}
+.pv-hint.warn{color:var(--amber)}
+
+/* 提供方小标识：左栏、顶栏、授权卡 */
+.pv-tag{display:inline-block;flex:none;margin-left:4px;padding:0 4.5px;border-radius:4px;font-size:10px;line-height:16px;font-weight:500;letter-spacing:.01em;vertical-align:1px;
+  color:var(--pv-c,var(--muted));background:color-mix(in srgb,var(--pv-c,var(--muted)) 10%,transparent);box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--pv-c,var(--muted)) 22%,transparent)}
+.pv-tag[data-p=codex],.pv-badge[data-p=codex]{--pv-c:var(--pv-codex)}
+.pv-tag[data-p=agy],.pv-badge[data-p=agy]{--pv-c:var(--pv-agy)}
+.pv-badge{flex:none;margin-left:-2px;padding:1px 7px;border-radius:6px;font-size:11.5px;line-height:18px;font-weight:500;
+  color:var(--pv-c);background:color-mix(in srgb,var(--pv-c) 14%,transparent)}
+.pv-badge[hidden]{display:none}
+.srow>.pv-tag{margin-left:0}
+#card h3 .pv-tag{margin:0 8px 0 0;font-size:11.5px;line-height:18px;vertical-align:2px}
+.pv-reason{color:var(--muted)}
+.pv-files{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto;margin:6px 0}
+.pv-files .it.tool{margin:0}
+
+/* 输入栏：这两家用自己的模型、思考强度、权限药丸，Claude 的三个藏起来 */
+.pv-pill{display:none}
+body.pv-on .pv-pill:not([hidden]){display:inline-flex}
+body.pv-on #modelPill,body.pv-on #effortPill,body.pv-on #modePill{display:none!important}
+.pv-pop{min-width:220px;max-width:360px}
+.pv-pop.pv-mpop{width:320px}
+.pv-pop .h-note{padding:6px 10px;color:var(--muted);font-size:12.5px}
+
+/* Claude 专属功能：在这两家的对话里不显示（11-23：“任务”页已能列两家的子代理，不再藏，见 prov_agents.py） */
+body.pv-on #kRing,body.pv-on #ctx,
+body.pv-on #rpane .rtabs [data-tab=btw],
+body.pv-on .k-uact [data-a=rw],body.pv-on .k-end,body.pv-on #feed .fk,body.pv-on .spin .fk,
+body.pv-on #notice{display:none!important}
+
+@media (max-width:640px){.pv-seg button{padding:4px 10px}}

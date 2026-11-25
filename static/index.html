@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude 工作台</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/theme.css">
+<link rel="stylesheet" href="/static/feat.css"><!-- 第十一轮 B -->
+<link rel="stylesheet" href="/static/ux-c.css"><!-- 第十二轮 C：布局与导航 -->
+<link rel="stylesheet" href="/static/ux-d.css"><!-- 第十二轮 D -->
+<link rel="stylesheet" href="/static/ux-e.css"><!-- 第十三轮 E -->
+<link rel="stylesheet" href="/static/ux-f.css"><!-- 第十三轮 F -->
+<link rel="stylesheet" href="/static/ux-g.css"><!-- 第十三轮 G：Claude 操作工作台 -->
+<link rel="stylesheet" href="/static/ux-h.css"><!-- 第十四轮 H：新对话首页、输入栏浮层、顶栏侧栏 -->
+<link rel="stylesheet" href="/static/ux-j.css"><!-- 第十四轮 J：设置面板、用量、偏好、原生标题栏 -->
+<link rel="stylesheet" href="/static/ux-k.css"><!-- 第十五轮 F1：时间线与输入框 -->
+<link rel="stylesheet" href="/static/ux-l.css"><!-- 第十五轮 F2：审阅范围、任务停止、旁问、记忆与指令、左栏筛选、用…打开 -->
+<link rel="stylesheet" href="/static/ux-m.css"><!-- 第十五轮 G：网页预览点选元素 -->
+<link rel="stylesheet" href="/static/ux-p.css"><!-- 11-18：设置“个性化” -->
+<link rel="stylesheet" href="/static/ux-r.css"><!-- 第十六轮 R：远程访问（设置页、手机布局，手机样式只在远程页面生效） -->
+<link rel="stylesheet" href="/static/ux-v.css"><!-- 第十六轮 P：Codex、Antigravity 对话 -->
+<link rel="stylesheet" href="/static/ux-u.css"><!-- 第十七轮 U：额度与速度 -->
+<link rel="stylesheet" href="/static/ux-w.css"><!-- 第十七轮 M：多智能体协作 -->
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/vendor/hljs-github-dark.min.css" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="/static/vendor/hljs-github.min.css" media="(prefers-color-scheme: light)">
+<script src="/static/vendor/hljs-highlight.min.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
+<script src="/static/vendor/purify.min.js"></script>
+<script src="/static/ux-r.js"></script><!-- 第十六轮 R：远程访问；要在 app.js 之前加载（远程页面先接管 fetch、通知、事件流） -->
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div class="side-top">
+      <input id="filter" placeholder="搜索对话" autocomplete="off" spellcheck="false">
+      <button id="addFolder" class="icon" title="添加文件夹">＋</button>
+    </div>
+    <div id="projects"></div>
+    <div class="side-foot"><button id="showArch" class="link"></button></div>
+  </aside>
+  <main id="main">
+    <header id="top">
+      <div class="tinfo"><div id="title"></div><button id="cwd" class="crumb"></button></div>
+      <span class="grow"></span>
+      <button id="tocBtn" class="btn small">目录</button>
+      <button id="chgBtn" class="btn small">改动</button>
+      <button id="reviewBtn" class="btn small">审阅</button>
+      <button id="taskBtn" class="btn small">任务</button>
+      <button id="expBtn" class="btn small">导出</button>
+      <button id="moreBtn" class="btn small" title="更多">⋯</button>
+      <button id="newHere" class="btn small">新对话</button>
+    </header>
+    <div id="todoBar" hidden></div>
+    <div id="scroll"><div id="feed"></div></div>
+    <button id="jump" hidden title="回到底部">↓</button>
+    <div id="empty"><div class="empty-in"><i class="empty-ic"></i><b>Claude 工作台</b><span>选择一个对话继续，或新建对话开始</span></div></div>
+    <div id="dock">
+      <div id="pop" hidden></div>
+      <div id="spinner" hidden><span id="glyph">✳</span><span id="spinText"></span></div>
+      <div id="composer">
+        <div id="atts"></div>
+        <textarea id="input" rows="1" placeholder="输入消息" spellcheck="false"></textarea>
+        <div class="bar">
+          <select id="model" title="模型"></select>
+          <select id="effort" title="思考强度">
+            <option value="">思考 默认</option>
+            <option value="low">思考 低</option>
+            <option value="medium">思考 中</option>
+            <option value="high">思考 高</option>
+            <option value="xhigh">思考 超高</option>
+            <option value="max">思考 最高</option>
+          </select>
+          <select id="mode" title="权限模式">
+            <option value="default">权限 默认</option>
+            <option value="auto mode">自动</option>
+            <option value="manual mode">手动确认</option>
+            <option value="accept edits">自动接受编辑</option>
+            <option value="plan mode">规划模式</option>
+            <option value="bypass permissions">跳过确认</option>
+          </select>
+          <span class="bsep"></span>
+          <button id="attach" class="icon lbl" title="添加文件或图片"><svg viewBox="0 0 16 16"><path d="M13.2 7.6 8.1 12.7a3.3 3.3 0 0 1-4.7-4.7l5.4-5.4a2.2 2.2 0 0 1 3.1 3.1L6.6 11a1.1 1.1 0 0 1-1.6-1.6l4.9-4.9"/></svg><span>附件</span></button>
+          <button id="phraseBtn" class="icon lbl" title="常用短语"><svg viewBox="0 0 16 16"><path d="M2.5 4.2c0-.9.7-1.6 1.6-1.6h7.8c.9 0 1.6.7 1.6 1.6v5.2c0 .9-.7 1.6-1.6 1.6H7.2l-2.8 2.4V11h-.3c-.9 0-1.6-.7-1.6-1.6z"/><path d="M5.4 5.6h5.2M5.4 7.9h3.4"/></svg><span>常用语</span></button>
+          <span class="grow"></span>
+          <button id="ctx" class="chip-btn" hidden></button>
+          <button id="send" class="primary">发送</button>
+        </div>
+      </div>
+      <div id="status"></div>
+    </div>
+  </main>
+  <aside id="rpane" hidden>
+    <div id="rgrip"></div>
+    <div class="rtabs"><button data-tab="preview">预览</button><button data-tab="review">审阅</button><button data-tab="tasks">任务</button><button data-tab="sched">定时</button><button data-tab="ext">扩展</button><span class="grow"></span><button id="rclose" class="icon" title="关闭">×</button></div>
+    <div id="rbody"></div>
+  </aside>
+</div>
+<button id="quoteBtn" hidden>引用</button>
+<div id="palette" hidden><div class="pl-box"><input placeholder="输入操作或对话名称" spellcheck="false"><div class="pl-list"></div></div></div>
+<div id="modal" hidden><div class="card" id="card"></div></div>
+<div id="lightbox" hidden><img alt=""></div>
+<div id="toast" hidden></div>
+<script src="/static/app.js"></script>
+<script src="/static/app2.js"></script>
+<script src="/static/feat.js"></script><!-- 第十一轮 B：搜索、网页预览、MCP 与技能管理、对话分组与多选 -->
+<script src="/static/ux-c.js"></script><!-- 第十二轮 C：左右栏调宽与收起、提问跳转、未读与用时 -->
+<script src="/static/ux-d.js"></script><!-- 第十二轮 D：过程折叠、回复操作条、排队与立即发送、工具图标 -->
+<script src="/static/ux-e.js"></script><!-- 第十三轮 E：上次回复被中断、可继续 -->
+<script src="/static/ux-f.js"></script><!-- 第十三轮 F：出错恢复按钮、对话内查找、表格复制粘贴、归档删除可撤销、完成提示音 -->
+<script src="/static/ux-g.js"></script><!-- 第十三轮 G：Claude 操作工作台（cwb.py 打开文件、网页、截图） -->
+<script src="/static/ux-h.js"></script><!-- 第十四轮 H：新对话首页、模型与权限浮层、“+”菜单、发送键与启动偏好、顶栏图标、侧栏账号行、骨架、⌘N -->
+<script src="/static/ux-j.js"></script><!-- 第十四轮 J：设置面板（⌘,）、用量统计、外观字号通知等偏好生效、原生标题栏拖动 -->
+<script src="/static/ux-k.js"></script><!-- 第十五轮 F1：改动胶囊与分叉、回退代码、计划卡、拒绝并说明、上下文环、拦截与出错横幅、添加文件夹、简洁档、压缩 -->
+<script src="/static/ux-l.js"></script><!-- 第十五轮 F2：审阅范围、任务停止、旁问（⌘;）、记忆与指令、预览编辑、左栏筛选、用…打开 -->
+<script src="/static/ux-m.js"></script><!-- 第十五轮 G：网页预览点选元素 -->
+<script src="/static/ux-p.js"></script><!-- 11-18：设置“个性化”：风格和语气、全局指令、自定义命令、技能 -->
+<script src="/static/ux-v.js"></script><!-- 第十六轮 P：Codex、Antigravity 对话（首页选提供方、各家的模型与权限、左栏标识、授权卡） -->
+<script src="/static/ux-u.js"></script><!-- 第十七轮 U：设置“额度与速度”（额度、速度、用量）、侧栏额度小条 -->
+<script src="/static/ux-w.js"></script><!-- 第十七轮 M：多智能体协作（设置“协作”、委派卡、复核按钮、左栏挂靠、子任务审批） -->
+</body>
+</html>

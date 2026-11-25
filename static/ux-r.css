@@ -1,0 +1,125 @@
+/* 第十六轮 R：远程访问。
+   1. 设置 →“远程访问”页（本机、远程都用，类名都以 rr- 开头，只用在这一页和远程提示里）；
+   2. 远程页面（html.cwb-remote）专用：隐藏电脑上才能用的入口、页面内通知、授权失效提示；
+   3. 手机布局：只在 html.cwb-remote 且宽度 ≤ 640px 时生效，桌面窗口（本机打开）不受任何影响。 */
+
+/* ---------- 1. 设置页 ---------- */
+.rr-gh{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin:18px 2px 6px;min-width:0}
+.sj-hd+.rr-box .rr-gh:first-child{margin-top:8px}
+.rr-gh .rr-mini{margin-left:auto;height:24px;padding:0 9px;font-size:12px}
+.rr-v{color:var(--strong);font-size:13px;overflow-wrap:anywhere;text-align:right}
+.rr-url{font-family:var(--mono);font-size:12px}
+.rr-ok{color:var(--green);font-size:13px}
+.rr-bad{color:var(--red,#d9534f);font-size:13px}
+.rr-on{margin-left:8px;font-size:11.5px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);border-radius:999px;padding:0 6px}
+.rr-dname{color:var(--strong)}
+.rr-tip{padding:4px 14px 12px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+.sj-row+.rr-tip{border-top:0;padding-top:0}
+.rr-tip.rr-warn{color:var(--fg2);background:color-mix(in srgb,var(--accent) 7%,transparent);padding-top:10px}
+.rr-tip code{font-family:var(--mono);font-size:12px}
+.rr-tip a{color:var(--accent);overflow-wrap:anywhere}
+.rr-steps{margin:6px 0 0;padding-left:20px}
+.rr-steps li{margin:2px 0}
+.rr-steps b{color:var(--strong);font-weight:500}
+.sj-btn.rr-danger{color:var(--red,#d9534f)}
+.rr-box .sj-btn+.sj-btn{margin-left:6px}
+.rr-note-p{font-size:12.5px;color:var(--muted);margin:4px 2px 0;line-height:1.6}
+.rr-pair{display:flex;gap:18px;align-items:center;padding:14px;min-width:0}
+.rr-qrwrap{flex:none;width:184px;height:184px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.rr-qrwrap .rr-qr{width:176px;height:176px;display:grid;place-items:center;color:#555;font-size:12px;text-align:center}
+.rr-pair-r{flex:1;min-width:0;font-size:13px;color:var(--fg2)}
+.rr-pair-r p{margin:0 0 10px;line-height:1.6}
+.rr-plink{display:flex;gap:6px;min-width:0}
+.rr-plink .sj-in{font-family:var(--mono);font-size:11.5px}
+.rr-pfoot{display:flex;align-items:center;gap:8px;margin-top:10px}
+.rr-left{flex:1;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+@container (max-width:520px){.rr-pair{flex-direction:column;align-items:stretch}.rr-qrwrap{align-self:center}}
+
+/* ---------- 2. 远程页面：通用 ---------- */
+html.cwb-remote #lxOw,html.cwb-remote .racts [data-a="editor"],html.cwb-remote .racts [data-a="finder"]{display:none!important}
+#rrNotes{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;
+  width:min(420px,calc(100vw - 24px));pointer-events:none}
+.rr-note{pointer-events:auto;display:flex;align-items:flex-start;gap:8px;padding:10px 10px 10px 14px;border-radius:14px;background:var(--surface);
+  border:1px solid var(--line2);box-shadow:var(--sh3);cursor:pointer;animation:cwbToast .2s cubic-bezier(.2,.8,.2,1)}
+.rr-note-t{flex:1;min-width:0;display:flex;flex-direction:column;font-size:13px;line-height:1.45}
+.rr-note-t b{color:var(--strong);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rr-note-t span{color:var(--fg2);overflow-wrap:anywhere}
+.rr-note-x{flex:none;width:28px;height:28px;border:0;background:none;color:var(--muted);font-size:18px;border-radius:8px}
+#rrLock{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:var(--bg)}
+.rr-lock-in{max-width:360px;text-align:center}
+.rr-lock-in b{display:block;font-size:19px;color:var(--strong);margin-bottom:8px}
+.rr-lock-in p{color:var(--fg2);line-height:1.6;margin:0 0 18px}
+.rr-btn{min-height:44px;padding:0 22px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--strong);font:inherit;font-size:15px}
+.rr-btn.rr-pri{background:var(--strong);color:var(--bg);border-color:var(--strong)}
+#rrScrim{display:none}
+
+/* ---------- 3. 手机布局（远程页面、宽度 ≤ 640px） ---------- */
+@media (max-width:640px){
+  html.cwb-remote,html.cwb-remote body{height:100%;overscroll-behavior:none}
+  html.cwb-remote #app{position:fixed;left:0;right:0;top:var(--rr-vt,0);height:var(--rr-vh,100dvh);overflow:hidden}
+  /* 左栏：抽屉 */
+  html.cwb-remote body #side{position:fixed;z-index:30;top:var(--rr-vt,0);left:0;bottom:auto;height:var(--rr-vh,100dvh);
+    width:min(86vw,320px)!important;visibility:visible!important;border-right:1px solid var(--line);
+    padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);box-sizing:border-box;
+    transform:translateX(-104%);transition:transform .2s ease;box-shadow:none;overflow:hidden}
+  html.cwb-remote body.rr-drawer #side{transform:none;box-shadow:var(--sh4)}
+  html.cwb-remote body #side>:not(#uxLgrip){min-width:0!important}
+  html.cwb-remote #uxLgrip,html.cwb-remote #rgrip,html.cwb-remote #uxRmax{display:none!important}
+  html.cwb-remote #rrScrim{position:fixed;inset:0;z-index:29;background:var(--scrim,rgba(0,0,0,.4));opacity:0;pointer-events:none;transition:opacity .2s ease;display:block}
+  html.cwb-remote body.rr-drawer #rrScrim{opacity:1;pointer-events:auto}
+  html.cwb-remote #side .srow{min-height:44px}
+  html.cwb-remote #side .smore{display:block;min-width:34px;height:34px;line-height:34px}
+  html.cwb-remote #side .srow .stime{display:none}
+  html.cwb-remote #side .prow .pbtn{visibility:visible;min-width:34px;line-height:34px}
+  html.cwb-remote #filter{font-size:16px}
+  html.cwb-remote #sideNew kbd{display:none}
+  html.cwb-remote #hTip{display:none!important}  /* 悬停提示：手机没有悬停，点一下会留在屏幕上 */
+  /* 主区 */
+  html.cwb-remote #main{width:100%}
+  html.cwb-remote #top{padding:calc(6px + env(safe-area-inset-top)) 10px 6px;gap:2px;min-height:48px;align-items:center}
+  html.cwb-remote #top .tinfo{min-width:0;flex:1 1 auto;overflow:hidden}
+  html.cwb-remote #top #title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.cwb-remote #top .grow{flex:0 0 0}
+  html.cwb-remote #uxSideBtn{width:40px;height:40px;margin:0 2px 0 -4px}
+  html.cwb-remote #top .btn.small.h-ib,html.cwb-remote #top .h-ib{width:36px;height:36px}
+  html.cwb-remote #expBtn,html.cwb-remote #chgBtn{display:none!important}
+  html.cwb-remote #feed{padding-left:14px;padding-right:14px}
+  /* 输入框贴底：跟着软键盘（visualViewport）调整，底部留出安全区 */
+  html.cwb-remote #dock{padding:0 10px calc(8px + env(safe-area-inset-bottom));max-width:none}
+  html.cwb-remote body.rr-kb #dock{padding-bottom:8px}
+  html.cwb-remote body.h-home #dock{max-width:none}
+  html.cwb-remote #input{font-size:16px}
+  html.cwb-remote #send{min-height:36px;min-width:52px}
+  html.cwb-remote #composer .bar{gap:4px}
+  /* 右栏：全屏面板 */
+  html.cwb-remote #rpane{position:fixed;z-index:35;left:0;right:0;top:var(--rr-vt,0);height:var(--rr-vh,100dvh);width:100%!important;
+    border-left:0;padding-top:env(safe-area-inset-top);box-sizing:border-box}
+  html.cwb-remote .rtabs{overflow-x:auto;scrollbar-width:none}
+  html.cwb-remote .rtabs [data-tab]{flex:none;padding:6px 10px}
+  html.cwb-remote #rclose{width:40px;height:40px;font-size:20px;flex:none}
+  html.cwb-remote .racts .btn{min-height:38px}
+  /* 授权卡、选择题、计划卡：按钮够大好点 */
+  html.cwb-remote #modal{align-items:flex-end;padding:0}
+  html.cwb-remote #modal .card{width:100%;max-height:calc(var(--rr-vh,100dvh) - 24px);border-radius:18px 18px 0 0;
+    padding:18px 16px calc(14px + env(safe-area-inset-bottom));box-sizing:border-box}
+  html.cwb-remote #modal .acts{gap:8px}
+  html.cwb-remote #modal .acts .btn{flex:1 1 0;min-height:46px;font-size:15px;justify-content:center}
+  html.cwb-remote #modal .opt{min-height:44px}
+  html.cwb-remote #modal input,html.cwb-remote #modal textarea{font-size:16px}
+  html.cwb-remote #feed .k-placts .btn{min-height:44px;flex:1 1 auto;justify-content:center}
+  html.cwb-remote #feed .k-plan{margin-left:0;margin-right:0}
+  /* 菜单、提示 */
+  html.cwb-remote .menu .mi{min-height:42px}
+  html.cwb-remote #toast{bottom:calc(90px + env(safe-area-inset-bottom))}
+  /* 设置：整屏，上面一排分区 */
+  html.cwb-remote .sj-scrim{padding:0}
+  html.cwb-remote .sj-panel{width:100%;height:var(--rr-vh,100dvh);max-height:none;border-radius:0;flex-direction:column;padding-top:env(safe-area-inset-top);box-sizing:border-box}
+  html.cwb-remote .sj-nav{width:auto!important;flex-direction:row;gap:4px;padding:10px!important;margin-right:52px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);scrollbar-width:none;flex:none}
+  html.cwb-remote .sj-nav::-webkit-scrollbar{display:none}
+  html.cwb-remote .sj-nav h3,html.cwb-remote .sj-nav .sj-ng{display:none}
+  html.cwb-remote .sj-nav button{width:auto!important;flex:none;white-space:nowrap;padding:7px 11px!important}
+  html.cwb-remote .sj-x{top:calc(10px + env(safe-area-inset-top));width:36px;height:36px}
+  html.cwb-remote .sj-body{--sj-px:14px}
+  html.cwb-remote .sj-btn{height:34px}
+  html.cwb-remote .sj-in,html.cwb-remote .sj-sel{font-size:16px}
+}

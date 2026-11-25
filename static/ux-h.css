@@ -1,0 +1,235 @@
+/* ==========================================================================
+   第十四轮 H：新对话首页、输入栏药丸与浮层、顶栏图标、侧栏新对话与账号行、骨架、浮层统一
+   颜色全部沿用 theme.css 变量；时间线（#feed 内）不加动画；浮层出现 150ms 淡入加 4px 位移。
+   ========================================================================== */
+
+/* ---------- 通用线性图标 ---------- */
+.h-i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.h-i.h-chev{width:10px;height:10px;stroke-width:1.4;opacity:.75}
+.h-i.h-sm{width:14px;height:14px}
+.h-i.h-fill{fill:currentColor;stroke:none}
+
+/* ---------- 浮层统一：圆角、阴影、出现动画 ---------- */
+@keyframes hUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes hDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes hToast{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes hFade{from{opacity:0}to{opacity:1}}
+.menu,#pop,.pl-box,.h-pop{border-radius:var(--r-l);box-shadow:var(--sh3)}
+.menu{animation:hDown .15s cubic-bezier(.2,.8,.2,1)}
+#pop:not([hidden]){animation:hUp .15s cubic-bezier(.2,.8,.2,1)}
+#palette:not([hidden]) .pl-box{animation:hDown .15s cubic-bezier(.2,.8,.2,1)}
+#modal:not([hidden]){animation:hFade .15s ease-out}
+#modal:not([hidden]) .card{animation:hUp .15s cubic-bezier(.2,.8,.2,1)}
+#toast,#fUndo,#gToast{border-radius:var(--r-l);box-shadow:var(--sh3)}
+#toast:not([hidden]),#fUndo:not([hidden]),#gToast:not([hidden]){animation:hToast .15s cubic-bezier(.2,.8,.2,1)}
+#jump:not([hidden]){animation:hUp .15s cubic-bezier(.2,.8,.2,1)}
+
+.h-pop{position:fixed;z-index:40;box-sizing:border-box;min-width:200px;max-width:calc(100vw - 16px);overflow-y:auto;overflow-x:hidden;
+  padding:6px;background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);
+  border:1px solid var(--line);color:var(--fg);font-size:13px;line-height:1.45;
+  animation:hUp .15s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain;scrollbar-width:thin}
+.h-pop[data-dir=down]{animation-name:hDown}
+.h-pop:focus{outline:none}
+.h-pop.h-model{width:340px}
+/* 第十四轮 FH：模型浮层分两块：上面的模型列表单独滚动，下面的思考强度和 Fast 固定在底部 */
+.h-pop.h-model{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.h-model .h-mlist{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:6px 6px 0;overscroll-behavior:contain;scrollbar-width:thin}
+/* 列表放不下时上下边缘出一道淡阴影，提示还能滚（滚到头阴影被同色底盖住；macOS 滚动条平时不显示） */
+.h-model .h-mlist{background:linear-gradient(var(--surface) 40%,transparent) top/100% 14px no-repeat local,
+  linear-gradient(transparent,var(--surface) 60%) bottom/100% 14px no-repeat local,
+  radial-gradient(farthest-side at 50% 0,color-mix(in srgb,var(--fg) 16%,transparent),transparent) top/100% 7px no-repeat scroll,
+  radial-gradient(farthest-side at 50% 100%,color-mix(in srgb,var(--fg) 16%,transparent),transparent) bottom/100% 7px no-repeat scroll;background-color:var(--surface)}
+.h-model .h-mfoot{flex:none;padding:0 6px 6px}
+.h-pop.h-mode{width:300px}
+.h-pop.h-plusm{width:236px}
+.h-pop.h-projm{width:300px}
+.h-pop.h-subpop{width:280px;z-index:41;animation-name:hFade}
+.h-mi{display:flex;align-items:center;gap:10px;width:100%;min-width:0;box-sizing:border-box;margin:0;padding:7px 10px;border:0;border-radius:8px;
+  background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.h-mi:hover,.h-mi.open,.h-mi:focus-visible{background:var(--hover2);outline:none}
+.h-mi .h-mic{flex:none;display:grid;place-items:center;width:16px;color:var(--muted)}
+.h-mi .h-mt{flex:1;min-width:0;display:flex;flex-direction:column}
+.h-mi .h-mn{color:var(--strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-mi small{color:var(--muted);font-size:12px;line-height:1.4}
+.h-mi.h-one small,.h-mi.h-skill small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-mi.h-skill .h-mn{font-family:var(--mono);font-size:12.5px}
+.h-mi.h-model-it .h-mn{font-weight:500;font-size:13.5px}
+.h-mi .h-tag{flex:none;font-size:11px;line-height:16px;padding:0 6px;border-radius:5px;background:var(--hover);color:var(--muted)}
+.h-mi .h-arr{flex:none;display:grid;color:var(--dim)}
+.h-mi .h-ck{flex:none;display:grid;place-items:center;width:16px;color:var(--accent)}
+.h-mi.warn .h-mn{color:var(--amber)}
+.h-sep{height:1px;background:var(--line);margin:5px 6px}
+.h-note{padding:8px 10px;color:var(--muted);font-size:12.5px}
+.h-more{display:flex;align-items:center;width:100%;box-sizing:border-box;padding:7px 10px;border:0;border-radius:8px;background:transparent;color:var(--fg2);font:inherit;cursor:pointer;text-align:left}
+.h-more:hover,.h-more:focus-visible{background:var(--hover2);color:var(--strong);outline:none}
+.h-more .h-mc{margin-left:auto;display:grid;color:var(--dim);transition:transform .15s ease}
+.h-more[aria-expanded=true] .h-mc{transform:rotate(90deg)}
+.h-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 4px;padding:2px 4px 4px}
+.h-grid[hidden]{display:none}
+.h-gi{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;padding:5px 8px;border:0;border-radius:7px;background:transparent;
+  color:var(--fg2);font:inherit;font-size:12.5px;text-align:left;cursor:pointer}
+.h-gi span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-gi:hover,.h-gi:focus-visible{background:var(--hover2);color:var(--strong);outline:none}
+.h-gi.on{color:var(--strong);font-weight:500}
+.h-gi .h-i{color:var(--accent)}
+.h-gi:last-child:nth-child(odd){grid-column:1/-1}
+.h-row{display:flex;align-items:center;gap:10px;padding:8px 10px;min-width:0}
+.h-lb{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--strong);white-space:nowrap}
+.h-lbw{flex:1;min-width:0;display:flex;flex-direction:column}
+.h-lbw small{font-size:12px;color:var(--muted);line-height:1.4}
+.h-fastrow .h-bolt{width:13px;height:13px;color:var(--run)}
+.h-fastrow.off .h-lb{color:var(--muted)}
+.h-fastrow.off .h-bolt{color:var(--dim)}
+.h-seg{display:flex;flex:none;margin-left:auto;padding:2px;gap:2px;background:var(--seg-bg);border-radius:8px}
+.h-seg button{border:0;margin:0;padding:2px 7px;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:12px;line-height:18px;white-space:nowrap;cursor:pointer}
+.h-seg button:hover{color:var(--strong)}
+.h-seg button.on{background:var(--seg-on);color:var(--strong);box-shadow:var(--seg-sh);font-weight:500}
+.h-seg button:focus-visible{outline:2px solid var(--ring);outline-offset:0}
+.h-sw{position:relative;flex:none;margin:0 0 0 auto;padding:0;width:34px;height:20px;border:0;border-radius:999px;background:var(--line2);cursor:pointer;transition:background-color .15s ease}
+.h-sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s ease}
+.h-sw[aria-checked=true]{background:var(--run)}
+.h-sw[aria-checked=true]::after{left:16px}
+.h-sw:disabled{opacity:.45;cursor:default}
+.h-sw:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+
+/* ---------- 输入栏：“+”、药丸按钮；原下拉框、附件、常用语按钮收起（元素保留，供原有逻辑使用） ---------- */
+#composer{container-type:inline-size}
+#composer .bar>#model,#composer .bar>#effort,#composer .bar>#mode,#composer .bar>.bsep,#composer .bar>#attach,#composer .bar>#phraseBtn{display:none}
+#composer .bar{flex-wrap:nowrap;gap:2px;min-width:0}
+.h-plus{flex:none;display:grid;place-items:center;width:30px;height:30px;margin:0 4px 0 0;padding:0;border:1px solid var(--line2);border-radius:9px;
+  background:transparent;color:var(--fg2);cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.h-plus:hover,.h-plus.open{background:var(--hover2);color:var(--strong)}
+.h-pill{flex:0 1 auto;min-width:0;display:inline-flex;align-items:center;gap:5px;height:30px;margin:0;padding:0 8px 0 10px;border:0;border-radius:9px;
+  background:transparent;color:var(--fg2);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.h-pill:hover,.h-pill.open{background:var(--hover2);color:var(--strong)}
+.h-pill .h-pl{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.h-pill .h-i:not(.h-chev){width:14px;height:14px}
+.h-pill .h-bolt{color:var(--run)}
+.h-pill.warn{color:var(--amber)}
+/* 11-14：已选但要等这一轮结束才生效的模型、思考强度 */
+.h-pill .h-pend{flex:none;color:var(--amber);font-size:12px}
+.h-pendbar{display:flex;align-items:center;gap:10px;margin:2px 2px 6px;padding:8px 8px 8px 10px;border-radius:9px;background:var(--hover2);
+  color:var(--fg);font-size:12.5px;line-height:1.5}
+.h-pendbar>span{flex:1;min-width:0}
+.h-pendbar em{font-style:normal;color:var(--muted)}
+.h-pendgo{flex:none;height:28px;padding:0 11px;border:1px solid var(--line2);border-radius:8px;background:var(--surface);color:var(--strong);
+  font:inherit;font-size:12.5px;cursor:pointer;transition:background-color .12s ease}
+.h-pendgo:hover{background:var(--hover)}
+.h-pendgo:focus-visible{outline:2px solid var(--ring);outline-offset:1px}
+#modePill .h-i:not(.h-chev){color:var(--muted)}
+#modePill.warn .h-i:not(.h-chev){color:var(--amber)}
+#composer .bar .grow{min-width:4px}
+#composer .bar #ctx{flex:none}
+body.h-home #composer .bar #ctx{display:none}  /* 第十四轮 FH：首页不显示上一个对话的上下文用量 */
+@container (max-width:480px){#effortPill{display:none}#composer .bar #ctx{display:none}}
+@container (max-width:420px){#modePill .h-pl{display:none}#modelPill{max-width:120px}}
+#send[data-state=send],#send[data-state=stop]{width:32px;padding:0}
+body.h-creating #send{opacity:.55;pointer-events:none}
+
+/* ---------- 新对话首页 ---------- */
+#empty{display:none!important}
+.h-hero{display:none;flex-direction:column;align-items:center;padding:0 24px;flex:none;position:relative;z-index:1}
+.h-below{display:none;flex-wrap:wrap;justify-content:center;align-items:center;align-content:flex-start;gap:8px;box-sizing:border-box;width:min(756px,100%);padding:0 28px;flex:none;position:relative;z-index:1}
+body.h-home #main::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(620px 380px at 50% 34%,color-mix(in srgb,var(--home-glow,var(--run)) 7%,transparent),transparent 72%);
+  transition:background .3s ease}
+body.h-home[data-home-pv=codex] #main{--home-glow:var(--pv-codex,#3f8f7a)}
+body.h-home[data-home-pv=agy] #main{--home-glow:var(--pv-agy,#5b7fd6)}
+body.h-home #dock{position:relative;z-index:2}
+body.h-home #scroll,body.h-home #jump,body.h-home #todoBar,body.h-home #status,body.h-home #uxRail{display:none}
+body.h-home #top,body.h-home #dock{visibility:visible}
+body.h-home .h-hero{display:flex;margin-top:auto}
+body.h-home .h-below{display:flex;margin:14px auto auto;padding-bottom:9vh}
+body.h-home #dock{max-width:756px}
+body.h-home #composer{border-radius:20px;padding:14px 14px 10px 16px;box-shadow:var(--sh3)}
+body.h-home #input{min-height:48px}
+#input{min-height:1lh}  /* 第十四轮 FH：对话页空输入框至少一行高，改字号后也不出竖向滚动条（app.js 量高时同样取整到一行） */
+.h-bot{width:120px;height:98px;margin-bottom:20px;animation:hBob 3.2s ease-in-out infinite}
+.h-provider-logo{display:block;width:98px;height:98px;margin:0 auto}
+@keyframes hBob{50%{transform:translateY(-4px)}}
+.h-hello{margin:0 0 22px;font-size:28px;font-weight:600;line-height:1.28;color:var(--strong);letter-spacing:-.015em;text-align:center}
+.h-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;box-sizing:border-box;margin:0;padding:4px 12px;border:1px solid var(--line2);border-radius:999px;
+  background:var(--surface);color:var(--fg2);font:inherit;font-size:13px;line-height:20px;white-space:nowrap;cursor:pointer;transition:background-color .12s ease,color .12s ease,border-color .12s ease}
+.h-chip span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.h-chip:hover,.h-chip.open{background:var(--hover);color:var(--strong);border-color:color-mix(in srgb,var(--fg) 18%,var(--line2))}
+.h-chip.h-proj{border-style:solid;background:color-mix(in srgb,var(--fg) 4%,var(--surface));box-shadow:var(--sh1);max-width:260px;font-weight:500;color:var(--strong)}
+.h-bsep{flex:none;width:1px;height:16px;background:var(--line2);margin:0 2px}
+.h-chip .h-i:not(.h-chev){width:14px;height:14px;color:var(--run)}
+/* 没选中对话：顶栏只留标题和“更多” */
+body.h-nosess #top>:not(.tinfo):not(.grow):not(#uxSideBtn):not(#moreBtn){display:none}
+body.h-nosess #cwd{display:none}
+/* 离开首页：品牌图标、问候、下方 chip 的影子原地淡出 */
+.h-ghost{position:fixed!important;display:flex!important;margin:0!important;z-index:3;pointer-events:none;animation:hGhost .2s ease forwards}
+@keyframes hGhost{to{opacity:0;transform:translateY(-6px)}}
+#feed.h-in{animation:hFade .2s ease-out}
+@media (max-height:620px){.h-bot{display:none}.h-hello{font-size:22px;margin-bottom:14px}body.h-home .h-below{padding-bottom:3vh}}
+@media (max-width:760px){.h-below{padding:0 16px}.h-hello{font-size:24px}body.h-home #dock{max-width:732px}.h-bsep{display:none}}
+
+/* ---------- 加载骨架 ---------- */
+#hSkel{display:none;max-width:900px;margin:0 auto;padding:24px 28px;box-sizing:border-box}
+body.h-loading #hSkel{display:block;animation:hFade .15s ease-out}
+body.h-loading #feed{display:none}
+.h-sk-u,.h-sk-b i{background:linear-gradient(90deg,var(--skel) 0%,var(--skel2) 45%,var(--skel) 90%) 0 0/200% 100%;animation:hShim 1.3s linear infinite}
+.h-sk-u{height:46px;margin:14px 0 18px;border-radius:var(--r-m)}
+.h-sk-u.s2{height:34px;width:62%;margin-top:28px}
+.h-sk-b i{display:block;height:12px;margin:0 0 12px 28px;border-radius:6px}
+@keyframes hShim{to{background-position:-200% 0}}
+
+/* ---------- 顶栏：16px 线性图标按钮 ---------- */
+#top .btn.small.h-ib,.h-ib{position:relative;flex:none;display:inline-grid;place-items:center;width:30px;height:30px;margin:0;padding:0;border:0;border-radius:var(--r);
+  background:transparent;color:var(--muted);box-shadow:none;letter-spacing:0;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+#top .btn.small.h-ib:hover:not(:disabled),.h-ib:hover:not(:disabled),.h-ib.open{background:var(--hover2);color:var(--strong)}
+#top .btn.small.h-ib:disabled{opacity:.35;cursor:default}
+body.rp #top .btn.small.h-ib,body.rp #top #newHere.h-ib{padding:0}
+#top #newHere.h-ib{margin-left:4px;background:transparent;color:var(--muted);box-shadow:none}
+#top #newHere.h-ib:hover{background:var(--hover2);color:var(--strong)}
+#top{gap:2px}
+#top .h-tsep{flex:none;width:1px;height:14px;background:var(--line2);margin:0 4px}
+#top .h-ib.open{background:var(--hover2);color:var(--strong);box-shadow:inset 0 0 0 1px var(--line)}
+.h-ib[data-n]:not([data-n=""])::after{content:attr(data-n);position:absolute;top:1px;right:0;min-width:14px;height:14px;box-sizing:border-box;padding:0 3px;border-radius:7px;
+  background:var(--accent);color:var(--bg);font:600 9.5px/14px var(--sans);text-align:center;font-variant-numeric:tabular-nums;pointer-events:none}
+/* 悬停小提示 */
+#hTip{position:fixed;z-index:70;display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:var(--r-s);background:var(--btn);color:var(--btn-fg);
+  font-size:12px;line-height:18px;white-space:nowrap;pointer-events:none;box-shadow:var(--sh2);animation:hFade .12s ease-out}
+#hTip[hidden]{display:none}
+#hTip kbd{font:inherit;opacity:.6}
+
+/* ---------- 侧栏：新对话、搜索与添加文件夹、账号行 ---------- */
+#side .side-top{flex-wrap:wrap;row-gap:8px}
+/* 第十四轮 FH：同设计稿 r14.html 的 .newbtn：无边框、无底色，悬停浅底 */
+#sideNew{flex:1 0 100%;display:flex;align-items:center;gap:8px;box-sizing:border-box;height:36px;margin:0;padding:0 8px 0 6px;border:0;border-radius:9px;
+  background:none;color:var(--strong);font:inherit;font-size:14px;line-height:1;font-weight:500;box-shadow:none;cursor:pointer;transition:background-color .14s ease}
+#sideNew .h-i{width:20px;height:20px;padding:3px;box-sizing:border-box;border-radius:50%;background:var(--run);color:#fff;stroke-width:2;transition:transform .14s ease,filter .14s ease}
+#sideNew:hover{background:var(--side-hover,var(--hover))}
+#sideNew:hover .h-i{filter:brightness(1.06)}
+#sideNew:focus-visible{outline:2px solid var(--ring);outline-offset:-2px}
+#sideNew kbd{margin-left:auto;font:400 11.5px/1 var(--sans);color:var(--dim);letter-spacing:.02em}
+#addFolder{display:grid;place-items:center}
+#hMe{flex:none;display:flex;align-items:center;gap:9px;min-width:0;margin:4px 10px 8px;padding:7px 8px;border-radius:10px;cursor:pointer;transition:background-color .14s ease}
+#hMe:hover{background:var(--side-hover,var(--hover))}
+.h-av{flex:none;display:grid;place-items:center;width:28px;height:26px}
+.h-mebot{width:28px;height:23px;overflow:visible;transform-origin:50% 100%}
+.pb-b{fill:#D97757}
+.pb-e{fill:none;stroke:#141414;stroke-width:1.35;stroke-linecap:square;stroke-linejoin:miter}
+.pb-f{fill:#141414}
+#hMe:hover .h-mebot{animation:h-bot-hop .5s ease-out}
+@keyframes h-bot-hop{0%,100%{transform:translateY(0) scaleY(1)}30%{transform:translateY(0) scaleY(.88)}60%{transform:translateY(-3px) scaleY(1.04)}}
+@media (prefers-reduced-motion:reduce){.h-mebot{animation:none!important}}
+.h-me-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}
+.h-me-t b{font-size:13.5px;font-weight:500;color:var(--strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-me-t small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.h-me-t small:empty{display:none}
+#setBtn{width:28px;height:28px}
+.side-foot{padding:4px 10px}
+
+/* ---------- 主区右下角设置：仅左栏收起时显示，避免与左栏底部设置按钮重复 ---------- */
+#setBtn2{display:none;position:absolute;z-index:3;right:calc(max(0px,(100% - 956px) / 2) + 22px);bottom:9px;width:26px;height:26px;border-radius:7px}
+body.ux-sidec #setBtn2{display:inline-grid}
+#setBtn2 .h-i{width:15px;height:15px}
+body.ux-sidec #status{padding-right:34px}
+body.h-home #setBtn2{right:14px;bottom:10px}
+body.nosess:not(.h-home) #setBtn2{display:none}
+@media (max-width:760px){#setBtn2{right:10px}}
+
+/* ---------- 减少动态效果 ---------- */
+@media (prefers-reduced-motion: reduce){.h-bot{animation:none}.h-sk-u,.h-sk-b i{animation:none}}

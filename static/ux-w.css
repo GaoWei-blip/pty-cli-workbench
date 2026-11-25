@@ -1,0 +1,68 @@
+/* 移植自 T3 Code apps/web/src/components/chat/ChildThreadApprovals.tsx、TimelineWorkEntryRow.tsx 的界面布局（MIT，Copyright (c) 2026 T3 Tools Inc.） */
+/* 第十七轮 M：多智能体协作（委派卡、子任务审批、复核按钮、左栏挂靠、子对话横条、设置“协作”） */
+.w-card{margin:8px 0 10px;padding:11px 14px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);box-shadow:var(--sh1);font-size:12.5px;line-height:1.55;max-width:640px}
+.it.tool > .w-card{margin:6px 0 2px}
+.w-card.w-manual{margin:4px 0 10px 0}
+.w-ch{display:flex;align-items:center;gap:8px;min-width:0}
+.w-pv{flex:none;width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;background:var(--run)}
+.w-pv-codex{background:var(--pv-codex,#3f8f7a)}
+.w-pv-agy{background:var(--pv-agy,#5b7fd6)}
+.w-who{font-weight:600;color:var(--strong);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-st{flex:none;padding:0 8px;border-radius:999px;font-size:11.5px;line-height:20px;font-weight:500;background:var(--accent-soft);color:var(--accent)}
+.w-st.w-ok{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}
+.w-st.w-err{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.w-st.w-att{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.w-st.w-end{background:var(--hover2);color:var(--muted)}
+.w-time{margin-left:auto;flex:none;color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums}
+.w-ct{margin-top:4px;color:var(--fg)}
+.w-cm{color:var(--muted);font-size:11.5px}
+.w-cb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.w-btn{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border:1px solid var(--line2);border-radius:var(--r);background:var(--bg);color:var(--fg2);font-size:12px;cursor:pointer;transition:background-color .12s ease,color .12s ease,border-color .12s ease}
+.w-btn:hover{background:var(--hover2);color:var(--strong)}
+.w-btn.w-pri{border-color:transparent;background:var(--btn);color:var(--btn-fg);box-shadow:var(--sh1)}
+.w-btn.w-pri:hover{background:var(--btn-h);color:var(--btn-fg)}
+.w-btn .h-i{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.4}
+.w-done{color:var(--dim);font-size:11.5px}
+.w-res{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);max-height:420px;overflow:auto}
+/* 委派那一行带着委派卡，过程折叠（ux-d 的“执行了 N 步”）时也留在外面，和 T3 一样一眼能看到子任务 */
+#feed .it.tool.w-tool[data-cwb-task]:not([data-cwb-task=""]).dz-h{display:block!important}
+.it.tool.w-tool > .box{display:none}
+.it.tool.w-tool.open > .box{display:block}
+.w-rev{display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle}
+.w-rbtn,.w-rdd{height:22px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.w-rbtn{padding:0 8px;border-radius:6px}
+.w-rdd{padding:0 5px;border-left:0;border-radius:0 6px 6px 0}
+.w-rev .w-rbtn:not(:last-child){border-radius:6px 0 0 6px}
+.w-rbtn:hover,.w-rdd:hover{color:var(--fg);background:var(--accent-soft)}
+.w-rbtn:disabled{opacity:.55;cursor:default}
+.w-perms{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto;margin:0 0 8px}
+.w-ap{border:1px solid var(--line2);border-radius:9px;padding:8px 10px;background:var(--surface,transparent);font-size:12px}
+.w-aph{margin:0 0 5px;font-weight:600;color:var(--strong)}
+.w-apd{margin:0;max-height:120px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:11.5px;color:var(--fg2)}
+.w-apb{display:flex;gap:6px;margin-top:6px}
+.w-banner{display:flex;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted);background:var(--bg,transparent)}
+.w-banner .w-bp{font-size:12.5px;padding:0;color:var(--accent)}
+.w-bn{color:var(--dim);font-size:11.5px}
+.srow.w-kid{padding-left:22px}
+.w-arrow{color:var(--dim);margin-right:4px}
+.w-kpv{margin-left:6px;padding:0 5px;border-radius:4px;background:var(--code);color:var(--muted);font-size:10.5px;line-height:16px;vertical-align:1px}
+.w-cnt{flex:none;min-width:16px;height:16px;padding:0 4px;margin-right:4px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:10.5px;line-height:16px;text-align:center}
+.w-dlg{margin-top:12px}
+.w-gh{margin:0 2px 6px;color:var(--muted);font-size:12px;font-weight:600}
+.w-gh2{margin:16px 2px 6px;color:var(--muted);font-size:12px;font-weight:600}
+.w-pc{margin:6px 0 10px}
+.w-pct{font-weight:600;color:var(--strong);margin-bottom:4px}
+.w-pcx{white-space:pre-wrap;word-break:break-word;color:var(--fg2);font-size:12.5px;max-height:160px;overflow:auto}
+.w-pcm{margin-top:6px;color:var(--muted);font-size:12px}
+.w-nums{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px}
+.w-num{display:inline-flex;align-items:center;gap:4px}
+.w-in{width:56px;height:26px;padding:0 6px;border:1px solid var(--line2);border-radius:6px;background:transparent;color:var(--fg);font-size:12.5px}
+.w-num span{color:var(--muted);font-size:12px}
+/* 11-24：子对话默认收起，父对话行上的“› N”展开/收起 */
+.srow.w-kid.w-hide{display:none!important}
+.w-fold{flex:none;display:inline-flex;align-items:center;gap:1px;height:18px;padding:0 6px 0 3px;margin-right:4px;border:0;border-radius:999px;background:var(--hover2);color:var(--muted);font-size:10.5px;line-height:18px;font-variant-numeric:tabular-nums;cursor:pointer;transition:background-color .12s ease,color .12s ease}
+.w-fold:hover{background:var(--line2);color:var(--strong)}
+.w-fold .w-chev{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s ease}
+.w-fold.w-open .w-chev{transform:rotate(90deg)}
+.w-fold.w-run{background:color-mix(in srgb,var(--run) 14%,transparent);color:var(--run)}
+.w-fold.w-att{background:var(--accent-soft);color:var(--accent)}

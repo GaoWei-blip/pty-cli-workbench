@@ -1,0 +1,37 @@
+/* 11-18 设置 →“个性化” */
+.ps-gh{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--muted);margin:18px 2px 6px;min-width:0}
+.sj-hd+.ps-gh{margin-top:8px}
+.ps-gh span{font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ps-ta-wrap{padding:6px 14px 12px}
+.sj-row+.ps-ta-wrap{padding-top:0}
+.ps-ta{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:64px;padding:8px 10px;border:1px solid var(--line2);border-radius:var(--r);
+  background:var(--bg);color:var(--strong);font:12.5px/1.6 var(--mono)}
+.ps-ta:focus{outline:none;border-color:color-mix(in srgb,var(--accent) 50%,var(--line2));box-shadow:0 0 0 3px var(--accent-soft)}
+.ps-extra{font-family:inherit;font-size:13px}
+.ps-acts{display:flex;align-items:center;gap:8px;margin-top:8px}
+.ps-acts .grow,.ps-msg{flex:1}
+.ps-msg{font-size:12px;color:var(--green)}
+.sj-btn.sj-pri:not(:disabled){background:var(--strong);border-color:var(--strong);color:var(--bg)}
+.sj-btn.sj-pri:not(:disabled):hover{opacity:.88;background:var(--strong);color:var(--bg)}
+.ps-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;min-width:0}
+.ps-bar .sj-seg{min-width:0;overflow:hidden}
+.ps-bar .grow{flex:1}
+.ps-list{border-top:1px solid var(--line)}
+.ps-list .sj-empty{padding:18px 14px}
+.ps-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line);min-width:0}
+.ps-item:first-child{border-top:0}
+.ps-main{flex:1;min-width:0}
+.ps-nm{font-size:13px;color:var(--strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ps-hint{font-size:12px;color:var(--dim);font-family:var(--mono)}
+.ps-ds{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ps-item .sj-btn{height:26px;padding:0 9px;font-size:12px}
+.sj-btn.ps-del:hover:not(:disabled){color:var(--red)}
+.ps-ed{padding:12px 14px 14px}
+.ps-edh{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--strong);margin-bottom:10px}
+.ps-edh span{font-size:12px;color:var(--dim)}
+.ps-f{display:flex;align-items:center;gap:10px;margin-bottom:8px;min-width:0}
+.ps-f>span{flex:none;width:64px;font-size:12.5px;color:var(--muted)}
+.ps-f.ps-fcol{align-items:flex-start}
+.ps-f.ps-fcol>span{padding-top:7px}
+.ps-f .ps-ta{flex:1;width:auto;min-width:0}
+@media (max-width:640px){.ps-f{flex-direction:column;align-items:stretch;gap:4px}.ps-f>span{width:auto;padding-top:0}}

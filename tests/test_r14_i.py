@@ -15,7 +15,8 @@ import usage as U  # noqa: E402
 import server as S  # noqa: E402
 
 FAIL = []
-WB = '/Users/demo/claude-workbench/.venv/bin/python -I /Users/demo/claude-workbench/hook.py idle'
+_D = U.WB_MARK[:-len('/hook.py')]  # 跟着 usage.WB_MARK（仓库目录名）走
+WB = f'/Users/demo{_D}/.venv/bin/python -I /Users/demo{_D}/hook.py idle'
 TEST_HOOK = '/Users/demo/cwb-dev/r14/i/.venv/bin/python -I /Users/demo/cwb-dev/r14/i/hook.py idle'
 
 

@@ -20,7 +20,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-WB_HOOK = '/Users/demo/claude-workbench/.venv/bin/python -I /Users/demo/claude-workbench/hook.py idle'
+_D = '/' + os.path.basename(ROOT)  # 跟着 usage.WB_MARK（仓库目录名）走
+WB_HOOK = f'/Users/demo{_D}/.venv/bin/python -I /Users/demo{_D}/hook.py idle'
 
 # 对话 ID
 CA, CB, CC, CD = ('aaaaaaaa-0000-4000-8000-00000000000a', 'bbbbbbbb-0000-4000-8000-00000000000b',

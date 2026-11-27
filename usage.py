@@ -24,7 +24,8 @@ import uuid
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-WB_MARK = '/claude-workbench/hook.py'
+# 11-26：按仓库实际目录名生成（原来写死 /claude-workbench/hook.py，仓库换了目录名后工作台的轮次全都认不出、用量漏算）
+WB_MARK = '/' + os.path.basename(os.path.dirname(os.path.abspath(__file__))) + '/hook.py'
 CACHE_VER = 2
 HEAT_DAYS = 371
 

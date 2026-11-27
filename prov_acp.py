@@ -388,7 +388,11 @@ class AcpAdapter(core.Adapter):
             st = {'installed': True, 'ok': True, 'version': 'test', 'hint': ''}
         else:
             gem = os.path.join(NS['HOME'], '.gemini')
-            logged = os.path.exists(os.path.join(gem, 'oauth_creds.json')) or bool((NS.get('LOGIN_ENV') or {}).get('GEMINI_API_KEY'))
+            # 旧版 agy 把令牌写在 oauth_creds.json；1.5.x 起改存钥匙串，只留下终端 agy 的数据目录 antigravity-cli
+            # （工作台自己的 antigravity-cwb 不算）。真没登录时，建会话会收到 auth_required，由 auth_hint 提示。
+            logged = (os.path.exists(os.path.join(gem, 'oauth_creds.json'))
+                      or os.path.isdir(os.path.join(gem, 'antigravity-cli'))
+                      or bool((NS.get('LOGIN_ENV') or {}).get('GEMINI_API_KEY')))
             st = {'installed': True, 'ok': logged, 'version': self.version(),
                   'hint': '' if logged else '还没登录 Antigravity：在终端运行 agy，按提示用 Google 登录后再回来。'}
         self.st_cache = (time.time(), st)

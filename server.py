@@ -5534,12 +5534,17 @@ USAGE = US.Usage(PROJECTS_DIR, cache_path=os.path.join(RUN_DIR, 'usage-cache.jso
                  titles=usage_titles, label=model_label, live_keys=lambda: list(KEYS), log=log)
 
 
+def claude_scope(b):
+    """11-26：Claude 用量口径。'all' 终端、VS Code 里跑的也算（界面默认传这个）；不传或 'wb' 只算工作台（原口径，老调用方不变）。"""
+    return 'all' if (b or {}).get('claudeScope') == 'all' else 'wb'
+
+
 def api_usage(b):
-    return USAGE.query(str(b.get('range') or 'today'))
+    return USAGE.query(str(b.get('range') or 'today'), scope=claude_scope(b))
 
 
 def api_usage_summary(b):
-    return USAGE.summary()
+    return USAGE.summary(scope=claude_scope(b))
 
 
 APP_VERSION = '1.0'

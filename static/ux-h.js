@@ -858,7 +858,9 @@ async function loadUsage() {
   if (document.hidden) return;
   let t = '', mood = null, mi = -1;
   try {
-    const d = await api('usage-summary', {}), x = d && d.today;
+    let cs = 'all';
+    try { cs = JSON.parse(localStorage.getItem('cwb.uu.cscope')) === 'wb' ? 'wb' : 'all'; } catch {}  // 11-26：和用量页同一个 Claude 统计范围
+    const d = await api('usage-summary', {claudeScope: cs}), x = d && d.today;
     if (x && x.requests != null) {
       const c = Number(x.cost) || 0;
       t = `今天 ${Number(x.requests) || 0} 次请求 · $${c.toFixed(2)}`;

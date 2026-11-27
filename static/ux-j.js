@@ -519,11 +519,13 @@ function stopUsage() { clearTimeout(U.timer); U.timer = 0; U.seq++; }
    不传参数时就是 Claude，和原来一模一样。和 Claude 不同的地方：没有价格时（kpi.cost 为 null）不显示钱，图表没有“费用”；
    Codex 的“估算费用”换成“占周额度”；活跃度只统计 heatSince 之后 */
 const PNAME = {codex: 'Codex', agy: 'Antigravity'};
+/* 11-26：Claude 统计范围，和 ux-u.js 共用偏好 cwb.uu.cscope：all（默认）含终端、VS Code；wb 只算工作台 */
+const cscope = () => { try { return JSON.parse(localStorage.getItem('cwb.uu.cscope')) === 'wb' ? 'wb' : 'all'; } catch { return 'all'; } };
 const noCost = d => !!U.prov && (!d.kpi || d.kpi.cost == null);
 const metricOf = d => (U.metric === 'cost' && noCost(d) ? 'tokens' : U.metric);
 function rUsage(o) {
   U.prov = (o && PNAME[o.provider] && o.provider) || '';
-  body.innerHTML = head('用量', '只统计在工作台里运行的对话 · 费用按官方价估算，实际以网关账单为准') +
+  body.innerHTML = head('用量', (cscope() === 'wb' ? '只统计在工作台里运行的对话' : '统计本机所有 Claude 对话（含终端和 VS Code）') + ' · 费用按官方价估算，实际以网关账单为准') +
     '<div class="sj-qcard"></div>' +  // 第十四轮补：额度
     `<div class="sj-ubar">${seg('range', [['today', '今天'], ['7d', '7 天'], ['30d', '30 天']], U.range, '时间范围')}<span class="grow"></span><span class="sj-upd"></span></div><div class="sj-ubody"></div>`;
   quotaCard(body.querySelector('.sj-qcard'));
@@ -532,12 +534,12 @@ function rUsage(o) {
 }
 async function loadUsage() {
   stopUsage();
-  const seq = U.seq, range = U.range, prov = U.prov, ck = prov ? prov + '|' + range : range, box = body.querySelector('.sj-ubody');
+  const seq = U.seq, range = U.range, prov = U.prov, cs = cscope(), ck = prov ? prov + '|' + range : range + '|' + cs, box = body.querySelector('.sj-ubody');
   if (!box) return;
   const cached = U.cache[ck];
   if (cached) drawUsage(cached); else { box.innerHTML = '<div class="sj-empty">读取中…</div>'; body.querySelector('.sj-upd').textContent = ''; }
   let d;
-  try { d = await api('usage', prov ? {range, legacy: prov} : {range}); }
+  try { d = await api('usage', prov ? {range, legacy: prov} : {range, claudeScope: cs}); }
   catch (e) {
     if (seq !== U.seq || cur !== 'usage') return;
     if (!cached) { box.innerHTML = errBox('用量统计暂时不可用：' + e.message, true); bind(box, {}, {retry: loadUsage}); }

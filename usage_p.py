@@ -1861,7 +1861,7 @@ class Hub:
         return nonempty, out
 
     # ---- 收集三家的记录
-    def _claude(self, rng, start, now, claude_q):
+    def _claude(self, rng, start, now, claude_q, scope='wb'):
         """Claude（第十四轮现状，只算工作台）：query() 的结果（接口已经算好的就直接用，不重算）和同一对象 build() 里同一时段的行。
         build() 的行：(时间毫秒, sid, 模型, 输入, 输出, 缓存读, 缓存写, fast, 耗时毫秒, 费用, 日期, 小时, 省下的钱)；时段过滤和 query() 一样只看起点。
         能否定价用 usage.price_key(model)（认不出系列的模型 cost_of 给 0，这里记 unpriced）。"""
@@ -1869,14 +1869,14 @@ class Hub:
         if u is None:
             return None
         import usage as US
-        q = claude_q if isinstance(claude_q, dict) and 'kpi' in claude_q else u.query(rng, now=now)
-        rows = [x for x in u.build() if x[0] >= start]
+        q = claude_q if isinstance(claude_q, dict) and 'kpi' in claude_q else u.query(rng, now=now, scope=scope)
+        rows = [x for x in u.build(scope) if x[0] >= start]  # 11-26：口径跟 query() 一致（all / wb）
         recs = []
         for x in rows:
             priced = bool(US.price_key(x[2]))
             recs.append([x[0], x[2], x[1], x[3], x[5], x[6], x[4], 0, None, None, '', x[8], x[9] if priced else None, x[12] if priced else 0.0])
         speeds = [(x[0], type(u)._row_speed(x)) for x in rows]
-        return {'q': q, 'rows': rows, 'recs': recs, 'speeds': speeds}
+        return {'q': q, 'rows': rows, 'recs': recs, 'speeds': speeds, 'scope': 'all' if scope == 'all' else 'wb'}
 
     def _codex_records(self, start, end, now):
         files = self.codex.file_records(self.window_start(now), int(now * 1000) - RETENTION_DAYS * 86400_000)
@@ -1903,7 +1903,7 @@ class Hub:
         return out, turns, rl
 
     # ---- 接口
-    def query(self, rng='today', provider='all', rollup=False, now=None, claude_q=None, raw=False):
+    def query(self, rng='today', provider='all', rollup=False, now=None, claude_q=None, raw=False, claude_scope='wb'):
         """新字段。claude_q：接口里原函数已算好的 USAGE.query(range) 结果（不传就自己调一次）。
         raw=True（11-23，给 legacy() 用）：算到“去重后计入的记录”就返回，不出新字段。"""
         self.ensure_fresh()
@@ -1926,7 +1926,7 @@ class Hub:
         cl = None
         # Claude：只算工作台（第十四轮现状）
         if 'claude' in want:
-            cl = self._claude(rng, start, now, claude_q)
+            cl = self._claude(rng, start, now, claude_q, claude_scope)
             if cl is not None:
                 scanning['claude'] = bool(cl['q'].get('scanning'))
                 for r in cl['recs']:
@@ -2229,6 +2229,7 @@ class Hub:
         return out
 
     CLAUDE_WHY = {'ttft': '只算工作台的 Claude 统计没有记首字时间', 'turn': '只算工作台的 Claude 统计没有记每轮用时'}
+    CLAUDE_WHY_ALL = {'ttft': 'Claude 的用量统计没有记首字时间', 'turn': 'Claude 的用量统计没有记每轮用时'}  # 11-26：含终端、VS Code 时
 
     def _claude_out(self, cl, kept, out_providers, speed_providers, sess_tot, rollup):
         """Claude 一栏：KPI、按模型的输出速度直接取 query() 的结果（字段换成契约的名字）；对话排行不勾“子任务”时取 query() 的
@@ -2242,14 +2243,15 @@ class Hub:
                                     'approx': {'tps': True}, 'why': dict(self.CLAUDE_WHY, tps=self.WHY['none']), 'models': []})
             return
         q, k = cl['q'], cl['q']['kpi']
-        out_providers.append({'id': 'claude', 'label': LABELS['claude'], 'scope': 'workbench', 'scanning': bool(q.get('scanning')),
+        out_providers.append({'id': 'claude', 'label': LABELS['claude'], 'scope': 'all' if cl.get('scope') == 'all' else 'workbench',
+                              'scanning': bool(q.get('scanning')),
                               'kpi': {'requests': k['requests'], 'turns': None, 'sessions': len({x[1] for x in cl['rows']}),
                                       'uncachedInput': k['input'], 'cachedInput': k['cacheRead'], 'cacheWrite': k['cacheWrite'],
                                       'output': k['output'], 'reasoning': 0, 'tokens': k['tokens'], 'cost': k['cost'],
                                       'costSource': 'modelPriced', 'cacheHit': k['cacheHit'], 'saved': k['saved'], 'weekQuota': None}})
 
         def why(tps, has_any):
-            w = dict(self.CLAUDE_WHY)
+            w = dict(self.CLAUDE_WHY_ALL if cl.get('scope') == 'all' else self.CLAUDE_WHY)
             if tps is None:
                 w['tps'] = self.WHY['claude']['tps'] if has_any else self.WHY['none']
             return w
@@ -2491,7 +2493,8 @@ def setup(ns):
             return HUB.legacy(str(b.get('range') or 'today'), b['legacy'])
         d = orig(b)
         try:
-            extra = HUB.query(str(b.get('range') or 'today'), str(b.get('provider') or 'all'), bool(b.get('rollup')), claude_q=d)
+            extra = HUB.query(str(b.get('range') or 'today'), str(b.get('provider') or 'all'), bool(b.get('rollup')), claude_q=d,
+                              claude_scope='all' if b.get('claudeScope') == 'all' else 'wb')
             d = dict(d)
             for k, v in extra.items():
                 if k not in d:  # 原有字段一个不动

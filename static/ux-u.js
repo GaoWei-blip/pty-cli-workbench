@@ -33,7 +33,10 @@ const st = {
   smetric: oneOf(sget('smetric', 'tps'), ['tps', 'ttft', 'turn'], 'tps'),
   brk: oneOf(sget('brk', 'model'), ['model', 'time'], 'model'),
   rollup: !!sget('rollup', false),
+  cscope: oneOf(sget('cscope', 'all'), ['all', 'wb'], 'all'),  // 11-26：Claude 统计范围：all 含终端、VS Code；wb 只算工作台
 };
+const CSCOPE_OPTS = [['all', '全部客户端'], ['wb', '只看工作台']];
+const cscopeSeg = () => sj.seg('ucscope', CSCOPE_OPTS, st.cscope, 'Claude 统计范围');
 const want = id => st.prov === 'all' || st.prov === id;
 /* 11-22 晚口径：Claude 用量只算工作台（providers[].scope = "workbench"），Codex、Antigravity 含终端和其他客户端（"all"）。
    界面在 Claude 一栏注明“只算工作台” */
@@ -554,7 +557,7 @@ function scanInfo(d, ps) {
 const PROV_OPTS = [['all', '全部'], ['claude', 'Claude'], ['codex', 'Codex'], ['agy', 'Antigravity']];
 const RANGE_OPTS = [['today', '今天'], ['7d', '7 天'], ['30d', '30 天']];
 const US = {cache: {}, timer: 0, seq: 0, last: null};
-const ukey = () => `${st.range}|${st.prov}|${st.rollup ? 1 : 0}`;
+const ukey = () => `${st.range}|${st.prov}|${st.rollup ? 1 : 0}|${st.cscope}`;
 /* 11-23 用户要求：只看某一家（Claude、Codex、Antigravity）时整页恢复第十四轮的“用量”页（ux-j.js 的 rUsage：指标卡、柱状图、
    模型 Top 4、活跃度、用量最多的对话、最近请求），不显示速度块和 T3 样式的用量块。
    Claude：数据是 usage 接口原有字段（只算工作台），额度卡用上面 11-23 版的 Claude 老卡（没有 5 小时、显示剩余）。
@@ -574,8 +577,9 @@ function renderOld() {
   const lead = b.querySelector('.sj-lead');
   if (lead && OLD_LEAD[st.prov]) lead.textContent = OLD_LEAD[st.prov];
   (lead || b.querySelector('.sj-hd')).insertAdjacentHTML('afterend',
-    `<div class="uu-top uu-top-old">${sj.seg('uprov', PROV_OPTS, st.prov, '提供方')}</div>`);
-  sj.bind(b.querySelector('.uu-top-old'), {uprov: v => { st.prov = v; sset('prov', v); hideTip(); render(); }});
+    `<div class="uu-top uu-top-old">${sj.seg('uprov', PROV_OPTS, st.prov, '提供方')}${st.prov === 'claude' ? cscopeSeg() : ''}</div>`);
+  sj.bind(b.querySelector('.uu-top-old'), {uprov: v => { st.prov = v; sset('prov', v); hideTip(); render(); },
+    ucscope: v => { st.cscope = v; sset('cscope', v); hideTip(); render(); }});
   const oc = b.querySelector('.sj-qcard');  // 老页面自带的额度卡（Claude 的，有 5 小时、显示已用）换成这一家的
   if (oc) { const box = document.createElement('div'); box.className = 'uu-qbody uu-qbody-old'; oc.replaceWith(box); }
   const rs = b.querySelector('.sj-ubar .sj-seg[data-k=range]');
@@ -596,7 +600,7 @@ function render() {
   clearTimeout(US.timer); US.seq++;
   if (st.prov !== 'all' && oldUsage) return renderOld();
   b.innerHTML = sj.head('额度与速度') + '<div class="uu-page">' +
-    `<div class="uu-top">${sj.seg('uprov', PROV_OPTS, st.prov, '提供方')}${sj.seg('urange', RANGE_OPTS, st.range, '时段')}<span class="grow"></span>` +
+    `<div class="uu-top">${sj.seg('uprov', PROV_OPTS, st.prov, '提供方')}${sj.seg('urange', RANGE_OPTS, st.range, '时段')}${cscopeSeg()}<span class="grow"></span>` +
     `<span class="uu-upd"></span><button type="button" class="uu-rf" data-a="refresh" aria-label="刷新" data-uutip="刷新">${IC_RF}</button></div>` +
     '<section class="uu-sec" data-b="quota"><h3 class="uu-h">额度</h3><div class="uu-qbody"></div></section>' +
     '<section class="uu-sec" data-b="speed"><h3 class="uu-h">速度</h3><div class="uu-sbody"></div></section>' +
@@ -604,6 +608,7 @@ function render() {
   sj.bind(b.querySelector('.uu-top'), {
     uprov: v => { st.prov = v; sset('prov', v); hideTip(); if (v !== 'all') { render(); return; } drawQuota(); refreshQuota(g); loadUsage(g); },
     urange: v => { st.range = v; sset('range', v); hideTip(); loadUsage(g); },
+    ucscope: v => { st.cscope = v; sset('cscope', v); hideTip(); loadUsage(g); },
   }, {refresh: (e, btn) => {
     if (btn.classList.contains('spin')) return;
     btn.classList.add('spin');
@@ -623,7 +628,7 @@ async function loadUsage(g, quiet) {
     for (const s of ['.uu-sbody', '.uu-ubody']) { const x = q(s); if (x) x.innerHTML = '<div class="uu-empty"><span class="sj-spin"></span>读取中…</div>'; }
   }
   let d;
-  try { d = await api('usage', {range: st.range, provider: st.prov, rollup: !!st.rollup}); }
+  try { d = await api('usage', {range: st.range, provider: st.prov, rollup: !!st.rollup, claudeScope: st.cscope}); }
   catch (e) {
     if (!live(g) || seq !== US.seq) return;
     if (!cached) {

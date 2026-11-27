@@ -446,13 +446,13 @@ class Usage:
             self.runs = load_runs(self.runs_path, self.live_keys()) if sig else (None, {})
         return self.runs
 
-    def build(self):
-        """去重、判断归属，返回计入工作台的回复（按时间排序），按版本缓存。
+    def build(self, scope='wb'):
+        """去重、判断归属，返回回复（按时间排序），按版本缓存。scope：'wb' 只算工作台（原口径）；'all'（11-26）终端、VS Code 等也算。
         每项：(时间毫秒, sid, 模型, 输入, 输出, 缓存读, 缓存写, fast, 耗时毫秒, 费用, 本地日期, 本地小时, 缓存省下的钱)"""
         since, win = self._runs()
         sig = (self.ver, self.runs_sig)
         if self.built and self.built[0] == sig:
-            return self.built[1]
+            return self.built[1]['all' if scope == 'all' else 'wb']
 
         def in_run(sid, t):
             return any(a <= t <= b for a, b in win.get(sid, ()))
@@ -470,7 +470,7 @@ class Usage:
             mains = {os.path.join(os.path.dirname(p), e['sid']): e for p, e in items if e['kind'] == 'main'}
             sub_cls = {}
             all_sids, wb_sids = set(), set()
-            out = []
+            out, out_all = [], []
             for rank, p, e, r in best.values():
                 sid = e['sid']
                 all_sids.add(sid)
@@ -488,20 +488,22 @@ class Usage:
                     if c == 0:
                         c = sub_cls[p] = self._sub_class(p, e, mains, since, in_run)
                     ok = c if c is not None else in_run(sid, t)
-                if not ok:
-                    continue
-                wb_sids.add(sid)
                 ms = (r[K_TE] - r[K_T0]) if r[K_T0] and r[K_TE] > r[K_T0] else None
                 if ms is not None and ms > 3600_000:
                     ms = None
                 lt = time.localtime(t / 1000)
-                out.append((t, sid, r[K_MODEL], r[K_IN], r[K_OUT], r[K_CR], r[K_CW], bool(r[K_FAST]), ms,
+                row = (t, sid, r[K_MODEL], r[K_IN], r[K_OUT], r[K_CR], r[K_CW], bool(r[K_FAST]), ms,
                             cost_of(r[K_MODEL], r[K_IN], r[K_OUT], r[K_CR], r[K_CW], r[K_FAST]),
-                            time.strftime('%Y-%m-%d', lt), lt.tm_hour, cache_saved(r[K_MODEL], r[K_IN], r[K_CR], r[K_CW], r[K_FAST])))
+                            time.strftime('%Y-%m-%d', lt), lt.tm_hour, cache_saved(r[K_MODEL], r[K_IN], r[K_CR], r[K_CW], r[K_FAST]))
+                out_all.append(row)
+                if ok:
+                    wb_sids.add(sid)
+                    out.append(row)
         out.sort(key=lambda x: x[0])
-        self.stats.update(sessions_all=len(all_sids), sessions_wb=len(wb_sids), messages=len(best), counted=len(out))
-        self.built = (sig, out)
-        return out
+        out_all.sort(key=lambda x: x[0])
+        self.stats.update(sessions_all=len(all_sids), sessions_wb=len(wb_sids), messages=len(best), counted=len(out), counted_all=len(out_all))
+        self.built = (sig, {'wb': out, 'all': out_all})
+        return out_all if scope == 'all' else out
 
     def _sub_class(self, p, e, mains, since, in_run):
         """子代理文件按启动时间落在父会话哪一轮：True/False；落在最后一轮之后（或找不到父记录）返回 None，逐条按时间段判断。"""
@@ -535,16 +537,17 @@ class Usage:
         v = [s for s in (self._row_speed(x) for x in rows) if s is not None]
         return round(statistics.median(v), 1) if v else None
 
-    def summary(self, now=None):
+    def summary(self, now=None, scope='wb'):
         self.ensure_fresh()
-        rows = self.build()
+        rows = self.build(scope)
         t0 = day_start(now, 0) * 1000
         n, i, o, cr, cw, c = self._sum([x for x in rows if x[0] >= t0])
         return {'scanning': self.scanning, 'today': {'requests': n, 'tokens': i + o + cr + cw, 'cost': round(c, 4)}}
 
-    def query(self, rng='today', now=None):
+    def query(self, rng='today', now=None, scope='wb'):
         self.ensure_fresh()
-        rows = self.build()
+        scope = 'all' if scope == 'all' else 'wb'
+        rows = self.build(scope)
         rng = rng if rng in ('today', '7d', '30d') else 'today'
         now = now or time.time()
         days = {'today': 1, '7d': 7, '30d': 30}[rng]

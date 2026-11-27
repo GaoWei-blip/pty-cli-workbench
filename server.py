@@ -1042,6 +1042,14 @@ SPIN_RE = re.compile(r'^\s*[✻✳✶✽✢·*✺✹✸✷]\s{1,2}(\S.*….*|(?:
 # 只认 CLI 转圈字符，正文里的“- 第二项……”不算。11-12：网关迟迟不回内容时 CLI 状态行变成“✻ Waiting for API response · will retry in …”，
 # 没有省略号，原来认不出，45 秒后误判空闲、界面显示“已完成”；这几句等待/重试提示也算在忙
 EFFORT_RE = re.compile(r'\b(low|medium|high|xhigh|max)\s*·\s*/effort')
+SPIN_TAIL_RE = re.compile(r'^(.*?…\s*\([^()]*\))\s*\S.*$')
+
+
+def clean_spin(t):
+    """11-26：CLI 局部重绘时状态行后半截可能残留之前屏幕上的字（如“(25s · ↓ 1.6k tokens · thinking) 397 try:”），
+    括号闭合后的内容一律丢掉；没有括号的状态行原样返回。"""
+    m = SPIN_TAIL_RE.match(t)
+    return m.group(1) if m else t
 HINT_WORDS = ('Enter to confirm', 'Esc to cancel', 'to select', 'to navigate', 'Esc to', 'Enter to')
 # 11-25 选择题连点：终端弹窗点完一项后 CLI 要过一会儿才翻页，期间同一个弹窗会再报给界面、出现在鼠标下面；
 # 授权卡交了之后 CLI 也要过一会儿才收起终端里的同一个提问。这段时间内不报这些旧画面。
@@ -1895,7 +1903,7 @@ class Runner:
             for k in range(max(0, a - 4), a):
                 m = SPIN_RE.match(lines[k])
                 if m:
-                    spinner = m.group(1).strip()
+                    spinner = clean_spin(m.group(1).strip())
             if not spinner:
                 # 状态行下面可能挂着待办清单、提示、排队的消息、重试提示，离输入框远：往上找顶格的状态行，碰到正文块就停
                 for k in range(a - 1, max(-1, a - 40), -1):
@@ -1903,7 +1911,7 @@ class Runner:
                     if not l.startswith(' '):
                         m = SPIN_RE.match(l)
                         if m:
-                            spinner = m.group(1).strip()
+                            spinner = clean_spin(m.group(1).strip())
                             break
                     if l.strip() and not l.startswith((' ', '❯')):
                         break
